@@ -41,11 +41,13 @@ No te conformes solo con una contraseña. BIGestPwd ofrece seguridad por capas:
 ## 🎨 Galería
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/81f5b860-fd7c-459a-9ee4-912a74af0c3a" width="45%" alt="Pantalla Principal" />
-  <img src="https://github.com/user-attachments/assets/b41353e5-3393-4e6a-bb53-6e5f3eb1d279" width="45%" alt="Seguridad USB" />
+  <img src="assets/about.jpg" width="60%" alt="Security" />
 </div>
+
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/ac041eb5-4c75-4398-87ac-c9e5cd0a5efb" width="60%" alt="Login" />
+  <img src="assets/create_password.jpg" width="45%" alt="About" />
+  
+  <img src="assets/security.jpg" width="45%" alt="Create Password" />
 </div>
 
 ---
