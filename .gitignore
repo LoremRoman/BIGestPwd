@@ -1,0 +1,32 @@
+# --- Python y Compilación ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Entornos Virtuales ---
+venv/
+env/
+.env
+
+# --- PyInstaller (Lo que genera build_final.py) ---
+build/
+dist/
+*.spec
+
+# --- Inno Setup (Lo que genera create_installer_final.py) ---
+Output/
+
+# --- Bases de Datos (¡SEGURIDAD!) ---
+*.db
+*.sqlite
+*.sqlite3
+/data/
+
+# --- IDEs y Sistema Operativo ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Logs y Errores ---
+*.log
