@@ -9,10 +9,8 @@ from io import BytesIO
 import pyotp
 from modules.encryption import encryption_system
 
-# --- PATH ---
 DATA_DIR = os.path.join(os.getcwd(), "data")
 DEFAULT_DB_PATH = os.path.join(DATA_DIR, "bigestpwd_secure.db")
-# ------------
 
 
 class TOTPOffline:
@@ -83,7 +81,7 @@ class TOTPOffline:
     def generate_qr_code(self, secret, username="BIGestPwd User"):
         try:
             totp = pyotp.TOTP(secret)
-            uri = totp.provisioning_uri(name=username, issuer_name="BIGestPwd 2.4")
+            uri = totp.provisioning_uri(name=username, issuer_name="BIGestPwd 2.5")
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_L,

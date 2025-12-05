@@ -245,34 +245,27 @@ class PasswordChangeModal:
 
     def update_master_password_and_data(self, old_password, new_password):
         try:
-            # 1. Verificar contraseña actual
             if not db_manager.verify_master_password(old_password):
                 print("❌ Contraseña antigua inválida")
                 return False
 
-            # 2. Obtener datos
             entries = db_manager.get_password_entries(old_password)
 
-            # 3. TOTP
             if self.totp.is_configured():
                 self.totp.reencrypt_secret(old_password, new_password)
 
-            # 4. Generar nuevo hash maestro
             new_master_hash, new_master_salt = encryption_system.hash_master_password(
                 new_password
             )
 
-            # ✅ CORRECCIÓN: Usar la ruta dinámica desde db_manager
             with sqlite3.connect(db_manager.db_path, check_same_thread=False) as conn:
                 cursor = conn.cursor()
 
-                # Actualizar config maestra
                 cursor.execute(
                     "UPDATE master_config SET master_hash = ?, master_salt = ?",
                     (new_master_hash, new_master_salt),
                 )
 
-                # Re-encriptar entradas
                 for entry in entries:
                     enc_pwd, pwd_salt = encryption_system.encrypt_data(
                         entry["password"], new_password

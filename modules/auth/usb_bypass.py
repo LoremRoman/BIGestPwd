@@ -10,10 +10,8 @@ try:
 except ImportError:
     psutil = None
 
-# --- PATH ---
 DATA_DIR = os.path.join(os.getcwd(), "data")
 DEFAULT_DB_PATH = os.path.join(DATA_DIR, "bigestpwd_secure.db")
-# ------------
 
 
 class USBBypass:

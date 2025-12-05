@@ -4,15 +4,15 @@ from pathlib import Path
 
 
 def create_installer_final():
-    print("🎯 CREANDO INSTALADOR PROFESIONAL (BIGestPwd 2.4)...")
+    print("🎯 CREANDO INSTALADOR PROFESIONAL (BIGestPwd 2.5)...")
     print("=" * 60)
 
     project_dir = Path(__file__).parent
 
     required_files = [
-        ("dist/BIGestPwd_2.4.exe", "Ejecutable compilado"),
+        ("dist/BIGestPwd_2.5.exe", "Ejecutable compilado"),
         ("icon.ico", "Icono de la aplicación"),
-        ("LICENSE.txt", "Licencia de uso"),
+        ("LICENSE", "Licencia de uso"),
     ]
 
     print("📋 Paso 1: Verificando archivos fuente...")
@@ -26,24 +26,21 @@ def create_installer_final():
             all_ok = False
 
     if not all_ok:
-        print(
-            "\n❌ Faltan archivos críticos. Por favor ejecuta 'build_final.py' primero."
-        )
+        print("\n❌ Faltan archivos críticos. Por favor ejecuta 'build.py' primero.")
         return
 
     print("\n📝 Paso 2: Generando script de Inno Setup (.iss)...")
 
-
     iss_content = f"""#define MyAppName "BIGestPwd"
-#define MyAppVersion "2.4"
+#define MyAppVersion "2.5"
 #define MyAppPublisher "BIGestPwd Security Team"
-#define MyAppExeName "BIGestPwd_2.4.exe"
+#define MyAppExeName "BIGestPwd_2.5.exe"
 
 [Setup]
 AppId={{{{B1G3STPWD-SECURE-VAULT-2024}}
 AppName={{#MyAppName}}
 AppVersion={{#MyAppVersion}}
-AppVerName={{#MyAppName}} 2.4
+AppVerName={{#MyAppName}} 2.5
 AppPublisher={{#MyAppPublisher}}
 DefaultDirName={{autopf}}\{{#MyAppName}}
 DefaultGroupName={{#MyAppName}}
@@ -54,9 +51,9 @@ SetupIconFile=icon.ico
 UninstallDisplayIcon={{app}}\icon.ico
 Compression=lzma2/max
 SolidCompression=yes
-LicenseFile=LICENSE.txt
+LicenseFile=LICENSE
 OutputDir=Output
-OutputBaseFilename=Instalador_BIGestPwd_2.4
+OutputBaseFilename=Instalador_BIGestPwd_2.5
 CloseApplications=yes
 RestartApplications=no
 
@@ -69,7 +66,7 @@ Name: "desktopicon"; Description: "Crear acceso directo en el &Escritorio"; Grou
 [Files]
 Source: "dist\{{#MyAppExeName}}"; DestDir: "{{app}}"; Flags: ignoreversion
 Source: "icon.ico"; DestDir: "{{app}}"; Flags: ignoreversion
-Source: "LICENSE.txt"; DestDir: "{{app}}"; Flags: ignoreversion
+Source: "LICENSE"; DestDir: "{{app}}"; Flags: ignoreversion
 
 [Icons]
 Name: "{{group}}\{{#MyAppName}}"; Filename: "{{app}}\{{#MyAppExeName}}"; WorkingDir: "{{app}}"; IconFilename: "{{app}}\icon.ico"
@@ -129,7 +126,7 @@ Filename: "{{app}}\{{#MyAppExeName}}"; Description: "Ejecutar {{#MyAppName}} aho
         return
 
     output_dir = project_dir / "Output"
-    setup_exe = output_dir / "Instalador_BIGestPwd_2.4.exe"
+    setup_exe = output_dir / "Instalador_BIGestPwd_2.5.exe"
 
     if setup_exe.exists():
         size_mb = setup_exe.stat().st_size / (1024 * 1024)
@@ -139,9 +136,9 @@ Filename: "{{app}}\{{#MyAppExeName}}"; Description: "Ejecutar {{#MyAppName}} aho
         print(f"📂 Ubicación: {setup_exe}")
         print(f"📏 Tamaño:    {size_mb:.2f} MB")
         print("\n🚀 CARACTERÍSTICAS:")
-        print("   ✓ Sin comentarios (Limpio)")
-        print("   ✓ Auto-arranque tras actualizar (skipifsilent eliminado)")
-        print("   ✓ Datos seguros (No toca bases de datos existentes)")
+        print("   ✓ Versión 2.5 Configurada")
+        print("   ✓ Ejecutable actualizado")
+        print("   ✓ Datos seguros")
         print("\n👉 Todo listo para subir el Release a GitHub.")
 
         try:

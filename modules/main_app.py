@@ -10,7 +10,7 @@ from modules.components.security_modals import (
     TOTPManagementModal,
 )
 from modules.components.widgets import ModernWidgets
-from modules.utils.helpers import WindowHelper
+from modules.utils.helpers import WindowHelper, PasswordHealth, Tooltip
 from modules.auth.multi_factor import MultiFactorAuth
 from modules.auth.totp_offline import TOTPOffline
 from modules.auth.usb_bypass import USBBypass
@@ -26,38 +26,27 @@ class MainApplication:
         self.mfa = MultiFactorAuth()
         self.totp = TOTPOffline()
         self.usb = USBBypass()
-
-        # DEBUG
-        print(
-            f"🔐 [MAIN_APP DEBUG] Contraseña recibida. Longitud: {len(master_password)}"
-        )
-
+        self.tooltip = Tooltip(root)
+        self.password_health_data = {}
         self.current_search = ""
         self.selected_item = None
-
         self.user_profile = self.mfa.get_user_profile()
-
-        # Configurar ventana
-        self.root.title("BIGestPwd 2.4 - Gestor Principal")
+        self.root.title("BIGestPwd 2.5 - Gestor Principal")
         self.root.configure(bg=self.widgets.bg_color)
 
-        # Cargar icono ventana principal si existe
         try:
             self.root.iconbitmap("icon.ico")
         except:
             pass
 
-        # Setup inicial
         self.setup_styles()
         self.create_interface()
         self.load_categories()
         self.load_passwords()
 
     def setup_styles(self):
-        """Configura estilos modernos"""
         self.style = self.widgets.setup_treeview_style()
 
-        # Estilo para Notebook (Pestañas)
         self.style.configure(
             "TNotebook", background=self.widgets.bg_color, borderwidth=0
         )
@@ -70,23 +59,18 @@ class MainApplication:
         )
         self.style.map(
             "TNotebook.Tab",
-            background=[("selected", self.widgets.card_bg)],  # Color activo
+            background=[("selected", self.widgets.card_bg)],
             foreground=[("selected", self.widgets.accent_color)],
         )
 
     def create_interface(self):
-        """Crea la interfaz principal"""
-        # 1. Header
         self.create_header()
 
-        # 2. Notebook Container
         main_container = tk.Frame(self.root, bg=self.widgets.bg_color)
         main_container.pack(fill="both", expand=True, padx=15, pady=10)
 
         self.notebook = ttk.Notebook(main_container)
         self.notebook.pack(fill="both", expand=True)
-
-        # 3. Pestañas
         self.create_passwords_tab()
         self.create_add_tab()
         self.create_security_tab()
@@ -94,7 +78,6 @@ class MainApplication:
         self.create_status_bar()
 
     def create_header(self):
-        """Encabezado superior"""
         header = tk.Frame(self.root, bg=self.widgets.bg_color, height=60)
         header.pack(fill="x", padx=20, pady=10)
 
@@ -119,12 +102,10 @@ class MainApplication:
             fg="white",
         ).pack(side="left", padx=10)
 
-        # Perfil
         if self.user_profile:
             p_text = self.user_profile["display_name"]
             if self.user_profile["is_anonymous"]:
                 p_text += " 🕶️"
-
             tk.Label(
                 header,
                 text="👤",
@@ -140,7 +121,6 @@ class MainApplication:
                 fg=self.widgets.text_secondary,
             ).pack(side="left")
 
-        # Botones Header
         btn_frame = tk.Frame(header, bg=self.widgets.bg_color)
         btn_frame.pack(side="right")
 
@@ -153,19 +133,16 @@ class MainApplication:
         ).pack(side="left", padx=5)
 
     def create_passwords_tab(self):
-        """Pestaña de lista de contraseñas"""
         tab = tk.Frame(self.notebook, bg=self.widgets.bg_color)
         self.notebook.add(tab, text="📁 Contraseñas")
 
         card = self.widgets.create_card(tab)
         card.pack(fill="both", expand=True, padx=10, pady=10)
 
-        # Filtros
         top_frame = tk.Frame(card, bg=self.widgets.card_bg)
         top_frame.pack(fill="x", padx=15, pady=15)
         top_frame.grid_columnconfigure(1, weight=1)
 
-        # Buscar
         tk.Label(
             top_frame,
             text="🔍 Buscar:",
@@ -178,7 +155,6 @@ class MainApplication:
         search_entry.grid(row=0, column=1, sticky="ew", ipady=5)
         search_entry.bind("<KeyRelease>", self.on_search_change)
 
-        # Categoría
         tk.Label(
             top_frame,
             text="📂 Categoría:",
@@ -193,7 +169,6 @@ class MainApplication:
         self.category_combo.grid(row=0, column=3, sticky="e", ipady=5)
         self.category_combo.bind("<<ComboboxSelected>>", self.on_category_change)
 
-        # Botones Acción
         action_frame = tk.Frame(card, bg=self.widgets.card_bg)
         action_frame.pack(fill="x", padx=15, pady=(0, 10))
 
@@ -209,20 +184,20 @@ class MainApplication:
         self.del_btn.pack(side="left", padx=5)
         self.del_btn.config(state="disabled")
 
-        # Treeview
         tree_frame = tk.Frame(card, bg=self.widgets.card_bg)
         tree_frame.pack(fill="both", expand=True, padx=15, pady=(0, 15))
 
-        cols = ("Categoría", "Título", "URL")
+        cols = ("Status", "Categoría", "Título", "Notas")
         self.tree = ttk.Treeview(tree_frame, columns=cols, show="headings", height=10)
 
+        self.tree.heading("Status", text="Status")
         self.tree.heading("Categoría", text="Categoría")
         self.tree.heading("Título", text="Título")
-        self.tree.heading("URL", text="URL")
-
+        self.tree.heading("Notas", text="Notas")
+        self.tree.column("Status", width=60, anchor="center")
         self.tree.column("Categoría", width=150, anchor="center")
-        self.tree.column("Título", width=300, anchor="w")
-        self.tree.column("URL", width=250, anchor="w")
+        self.tree.column("Título", width=250, anchor="center")
+        self.tree.column("Notas", width=300, anchor="center")
 
         sb = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=sb.set)
@@ -231,9 +206,30 @@ class MainApplication:
         sb.pack(side="right", fill="y")
 
         self.tree.bind("<<TreeviewSelect>>", self.on_tree_select)
+        self.tree.bind("<Motion>", self.on_tree_hover)
+
+    def on_tree_hover(self, event):
+        region = self.tree.identify_region(event.x, event.y)
+
+        if region == "cell":
+            col = self.tree.identify_column(event.x)
+            row_id = self.tree.identify_row(event.y)
+
+            if col == "#1" and row_id:
+                item_tags = self.tree.item(row_id, "tags")
+                if item_tags:
+                    db_id = int(item_tags[0])
+
+                    if db_id in self.password_health_data:
+                        data = self.password_health_data[db_id]
+                        self.tooltip.show_tip(
+                            data["title"], data["messages"], event.x_root, event.y_root
+                        )
+                        return
+
+        self.tooltip.hide_tip()
 
     def create_add_tab(self):
-        """Pestaña añadir contraseña"""
         tab = tk.Frame(self.notebook, bg=self.widgets.bg_color)
         self.notebook.add(tab, text="➕ Añadir")
 
@@ -253,7 +249,6 @@ class MainApplication:
         form.grid_columnconfigure(1, weight=1)
 
         self.form_entries = {}
-
         lbl_style = {
             "font": ("Segoe UI", 10, "bold"),
             "bg": self.widgets.card_bg,
@@ -341,10 +336,8 @@ class MainApplication:
         ).pack(pady=20)
 
     def create_security_tab(self):
-        """Pestaña de seguridad"""
         tab = tk.Frame(self.notebook, bg=self.widgets.bg_color)
         self.notebook.add(tab, text="🔒 Seguridad")
-
         center_frame = tk.Frame(tab, bg=self.widgets.bg_color)
         center_frame.pack(fill="both", expand=True, padx=40, pady=20)
 
@@ -355,7 +348,6 @@ class MainApplication:
             bg=self.widgets.bg_color,
             fg="white",
         ).pack(pady=(0, 20))
-
         self.create_sec_option(
             center_frame,
             "🔑 Llave Maestra",
@@ -363,7 +355,6 @@ class MainApplication:
             "Cambiar Contraseña",
             self.open_change_master_password,
         )
-
         self.create_sec_option(
             center_frame,
             "💾 Bypass USB",
@@ -371,7 +362,6 @@ class MainApplication:
             "Gestionar USBs",
             self.open_usb_management,
         )
-
         self.create_sec_option(
             center_frame,
             "📱 Autenticación TOTP",
@@ -381,19 +371,13 @@ class MainApplication:
         )
 
     def create_about_tab(self):
-        """Pestaña Acerca De (NUEVA)"""
         tab = tk.Frame(self.notebook, bg=self.widgets.bg_color)
         self.notebook.add(tab, text="ℹ️ Acerca de")
-
-        # Tarjeta Central
         card = self.widgets.create_card(tab)
         card.pack(expand=True, fill="both", padx=60, pady=40)
-
-        # Contenido centrado
         center = tk.Frame(card, bg=self.widgets.card_bg)
         center.pack(expand=True)
 
-        # Logo Grande
         icon_img = self.widgets.get_icon_image(size=(100, 100))
         if icon_img:
             self.widgets.image_cache["about_icon"] = icon_img
@@ -409,7 +393,7 @@ class MainApplication:
 
         tk.Label(
             center,
-            text="BIGestPwd 2.4",
+            text="BIGestPwd 2.5",
             font=("Segoe UI", 24, "bold"),
             bg=self.widgets.card_bg,
             fg="white",
@@ -421,13 +405,9 @@ class MainApplication:
             bg=self.widgets.card_bg,
             fg=self.widgets.text_secondary,
         ).pack(pady=(5, 20))
-
-        # Separador
         tk.Frame(center, bg=self.widgets.text_secondary, height=2, width=200).pack(
             pady=10
         )
-
-        # Créditos y Eslogan
         tk.Label(
             center,
             text="Created by LoremRoman",
@@ -436,7 +416,6 @@ class MainApplication:
             fg="white",
         ).pack(pady=(10, 5))
 
-        # Eslogan con estilo
         tagline = "Secure. Open Source. Free. Always."
         tk.Label(
             center,
@@ -446,10 +425,7 @@ class MainApplication:
             fg=self.widgets.accent_color,
         ).pack(pady=10)
 
-        # Botón Repositorio
-        repo_url = (
-            "https://github.com/LoremRoman/BIGestPwd"  # Puedes poner tu URL real aquí
-        )
+        repo_url = "https://github.com/LoremRoman/BIGestPwd"
 
         def open_repo():
             webbrowser.open(repo_url)
@@ -461,8 +437,6 @@ class MainApplication:
             self.widgets.accent_color,
             width=20,
         ).pack(pady=20)
-
-        # Copyright
         tk.Label(
             center,
             text="© 2025 LoremRoman. MIT License.",
@@ -474,13 +448,10 @@ class MainApplication:
     def create_sec_option(self, parent, title, desc, btn_text, command):
         card = self.widgets.create_card(parent)
         card.pack(fill="x", pady=10)
-
         inner = tk.Frame(card, bg=self.widgets.card_bg, padx=20, pady=15)
         inner.pack(fill="both", expand=True)
-
         info = tk.Frame(inner, bg=self.widgets.card_bg)
         info.pack(side="left", fill="both", expand=True)
-
         tk.Label(
             info,
             text=title,
@@ -495,7 +466,6 @@ class MainApplication:
             bg=self.widgets.card_bg,
             fg=self.widgets.text_secondary,
         ).pack(anchor="w")
-
         self.widgets.create_modern_button(
             inner, btn_text, command, self.widgets.accent_color, width=18
         ).pack(side="right")
@@ -503,11 +473,9 @@ class MainApplication:
     def create_status_bar(self):
         status = tk.Frame(self.root, bg=self.widgets.card_bg, height=25)
         status.pack(side="bottom", fill="x")
-
         txt = "Listo • Modo Seguro"
         if self.user_profile:
             txt = f"Conectado como: {self.user_profile['display_name']} • {txt}"
-
         self.status_label = tk.Label(
             status,
             text=txt,
@@ -541,9 +509,10 @@ class MainApplication:
                 self.form_entries["category"].set(cats[0]["name"])
 
     def load_passwords(self):
-        # Limpiar
         for i in self.tree.get_children():
             self.tree.delete(i)
+
+        self.password_health_data.clear()
 
         entries = db_manager.get_password_entries(self.master_password)
         search = self.current_search.lower()
@@ -558,12 +527,32 @@ class MainApplication:
             if cat != "Todas" and e["category"] != cat:
                 continue
 
-            self.tree.insert(
+            color_code, status_title, messages = PasswordHealth.calculate_status(
+                e["password"], e["date_for_check"]
+            )
+
+            note_preview = e["notes"].replace("\n", " ") if e["notes"] else ""
+            if len(note_preview) > 30:
+                note_preview = note_preview[:30] + "..."
+
+            self.password_health_data[e["id"]] = {
+                "title": status_title,
+                "messages": messages,
+            }
+
+            item_id = self.tree.insert(
                 "",
                 "end",
-                values=(e["category"], e["title"], e["url"] or ""),
-                tags=(e["id"],),
+                values=("●", e["category"], e["title"], note_preview),
+                tags=(str(e["id"]),),
             )
+
+            tag_name = f"status_{e['id']}"
+            self.tree.item(item_id, tags=(str(e["id"]), tag_name))
+            self.tree.tag_configure(tag_name, foreground=color_code)
+
+            self.tree.tag_configure(tag_name, foreground=color_code)
+
             count += 1
 
         self.update_status(f"Mostrando {count} contraseñas")
@@ -593,7 +582,6 @@ class MainApplication:
         self.del_btn.config(state="disabled", bg="#6b7280")
 
     def save_password(self):
-        # Obtener datos
         cat = self.form_entries["category"].get()
         title = self.form_entries["title"].get()
         user = self.form_entries["username"].get()
@@ -610,7 +598,6 @@ class MainApplication:
             )
             return
 
-        # Obtener ID categoría
         cats = db_manager.get_categories()
         cat_id = next((c["id"] for c in cats if c["name"] == cat), None)
 
@@ -622,7 +609,7 @@ class MainApplication:
             )
             self.clear_form()
             self.load_passwords()
-            self.notebook.select(0)  # Ir a lista
+            self.notebook.select(0)
         else:
             WindowHelper.show_custom_message(
                 self.root, "Error", "No se pudo guardar", is_error=True
@@ -648,7 +635,6 @@ class MainApplication:
         id_ = self.tree.item(self.selected_item, "tags")[0]
         entries = db_manager.get_password_entries(self.master_password)
         data = next((e for e in entries if e["id"] == int(id_)), None)
-
         if data:
             PasswordEditModal(
                 self.root, data, self.master_password, self.load_passwords
@@ -658,9 +644,9 @@ class MainApplication:
         if not self.selected_item:
             return
         id_ = int(self.tree.item(self.selected_item, "tags")[0])
-        title = self.tree.item(self.selected_item, "values")[1]
-
-        # Usar messagebox importado correctamente
+        title = self.tree.item(self.selected_item, "values")[
+            2
+        ]  # Título ahora es índice 2
         if messagebox.askyesno("Eliminar", f"¿Eliminar '{title}'?", parent=self.root):
             if db_manager.delete_password_entry(id_):
                 self.load_passwords()
@@ -677,13 +663,12 @@ class MainApplication:
 
     def on_master_changed(self, new_pwd):
         self.master_password = new_pwd
-        self.load_passwords()  # Recargar con nueva clave
+        self.load_passwords()
 
     def open_usb_management(self):
         def refresh_app():
             for widget in self.root.winfo_children():
                 widget.destroy()
-
             self.create_interface()
             self.load_categories()
             self.load_passwords()

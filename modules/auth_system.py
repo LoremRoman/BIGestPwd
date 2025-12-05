@@ -22,16 +22,13 @@ class LoginSystemNew:
     def create_login_interface(self, on_success_callback):
         self.on_success_callback = on_success_callback
 
-        # Limpiar
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        # Configuración Ventana
-        self.root.title("BIGestPwd 2.4 - Login Seguro")
+        self.root.title("BIGestPwd 2.5 - Login Seguro")
         self.root.configure(bg=self.widgets.bg_color)
         self.root.resizable(True, True)
 
-        # Icono ventana
         try:
             self.root.iconbitmap("icon.ico")
         except:
@@ -51,12 +48,9 @@ class LoginSystemNew:
         WindowHelper.center_window(self.root, 500, 700)
 
     def create_usb_login_interface(self, user_profile):
-        """Login USB Centrado"""
-        # Contenedor principal que centra todo
         main_frame = tk.Frame(self.root, bg=self.widgets.bg_color)
         main_frame.pack(expand=True, fill="both", padx=20, pady=20)
 
-        # Contenedor interno para agrupar widgets verticalmente
         center_box = tk.Frame(main_frame, bg=self.widgets.bg_color)
         center_box.pack(expand=True)
 
@@ -69,7 +63,6 @@ class LoginSystemNew:
                 fg=self.widgets.accent_color,
             ).pack(pady=(0, 20))
 
-        # Icono USB
         tk.Label(
             center_box,
             text="💾",
@@ -85,7 +78,6 @@ class LoginSystemNew:
             fg="white",
         ).pack(pady=(10, 5))
 
-        # Card estado
         status_card = tk.Frame(center_box, bg=self.widgets.card_bg, padx=20, pady=20)
         status_card.pack(fill="x", pady=30, ipadx=20)
 
@@ -106,7 +98,6 @@ class LoginSystemNew:
         )
         self.usb_status.pack(pady=(10, 0))
 
-        # Botones
         self.usb_login_btn = self.widgets.create_modern_button(
             center_box,
             "🔓 Entrar con USB",
@@ -143,15 +134,12 @@ class LoginSystemNew:
         self.verify_usb_status()
 
     def create_totp_login_interface(self, user_profile):
-        """Login Clásico Centrado (Sin scroll, full responsive)"""
         main_frame = tk.Frame(self.root, bg=self.widgets.bg_color)
         main_frame.pack(expand=True, fill="both", padx=20, pady=20)
 
-        # Caja central
         center_box = tk.Frame(main_frame, bg=self.widgets.bg_color)
         center_box.pack(expand=True)
 
-        # Header
         if user_profile:
             tk.Label(
                 center_box,
@@ -161,10 +149,9 @@ class LoginSystemNew:
                 fg=self.widgets.accent_color,
             ).pack(pady=(0, 15))
 
-        # Escudo centrado
         tk.Label(
             center_box,
-            text="🛡️",
+            text="🔒",
             font=("Segoe UI", 64),
             bg=self.widgets.bg_color,
             fg=self.widgets.accent_color,
@@ -177,11 +164,9 @@ class LoginSystemNew:
             fg="white",
         ).pack(pady=(5, 25))
 
-        # --- FORMULARIO ---
         form_frame = tk.Frame(center_box, bg=self.widgets.bg_color)
-        form_frame.pack(fill="x", ipadx=20)  # ipadx para dar ancho visual
+        form_frame.pack(fill="x", ipadx=20)
 
-        # Password
         tk.Label(
             form_frame,
             text="Contraseña Maestra",
@@ -196,7 +181,6 @@ class LoginSystemNew:
         self.master_entry.bind("<Return>", lambda e: self.attempt_totp_login())
         self.master_entry.focus()
 
-        # TOTP
         tk.Label(
             form_frame,
             text="Código de Verificación (TOTP)",
@@ -212,7 +196,6 @@ class LoginSystemNew:
         )
         self.totp_entry.pack(pady=(5, 20))
 
-        # Botones
         self.widgets.create_modern_button(
             center_box,
             "🚀 Iniciar Sesión",

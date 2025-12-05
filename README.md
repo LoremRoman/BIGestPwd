@@ -13,12 +13,12 @@
 
 ---
 
-**BIGestPwd 2.4** es la evolución de tu gestor de contraseñas de escritorio. Diseñado bajo la filosofía **"Zero-Knowledge"**, garantiza que tus datos nunca salgan de tu dispositivo sin estar fuertemente encriptados. Ahora con sistema de **actualizaciones automáticas** y correcciones visuales.
+**BIGestPwd** es la evolución de tu gestor de contraseñas de escritorio. Diseñado bajo la filosofía **"Zero-Knowledge"**, garantiza que tus datos nunca salgan de tu dispositivo sin estar fuertemente encriptados. Ahora con sistema de **actualizaciones automáticas** y correcciones visuales.
 
-## ✨ Novedades en v2.4
-*   🚀 **Auto-Updater:** ¡Olvídate de buscar nuevas versiones! El sistema ahora detecta, descarga e instala actualizaciones automáticamente con un solo clic.
-*   🎨 **Interfaz Mejorada:** Corrección de bugs visuales en los modales de seguridad y limpieza de interfaz al gestionar USBs.
-*   📦 **Instalador Inteligente:** El nuevo instalador detecta tu instalación previa y actualiza sin tocar tu base de datos.
+## ✨ Novedades en v2.5
+*   🚀 **Sistema de Novedades** Nueva interfaz de bienvenida que te informará detalladamente de las mejoras cada vez que actualices.
+*   🧹 **Limpieza!:** Ahora, cuándo copias una contraseña, automáticamente después de 1 min borra tu portapapeles para eviar filtrar información de forma malintencionada.
+*   🧬 **Vida saludable para tus contraseñas!:** Dentro de tus contraseñas guardadas, ahora verás "Status" de tus contraseñas, para conocer si son seguras o su tiempo de vida es largo.
 
 ---
 
@@ -58,7 +58,7 @@ No te conformes solo con una contraseña. BIGestPwd ofrece seguridad por capas:
 El método más sencillo para empezar a proteger tus contraseñas.
 
 1. Ve a la sección de **[Releases](../../releases)** de este repositorio.
-2. Descarga el último instalador: `Instalador_BIGestPwd_2.4.exe`.
+2. Descarga el último instalador: `Instalador_BIGestPwd_2.5.exe`. (O la versión más actual)
 3. Ejecútalo e instala.
 4. **¡Listo!** Cuando haya una nueva versión, el botón "🔄 Actualizar" dentro de la app hará todo el trabajo por ti.
 

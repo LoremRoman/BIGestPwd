@@ -25,18 +25,16 @@ class MFASetupWizard:
         self.setup_wizard()
 
     def setup_wizard(self):
-        """Configura el wizard con estilo moderno"""
-        self.parent.title("Configuración de Seguridad - BIGestPwd 2.4")
+        self.parent.title("Configuración de Seguridad - BIGestPwd 2.5")
         self.parent.configure(bg=self.widgets.bg_color)
 
-        width = 750  # Un poco más ancho para las explicaciones
+        width = 750
         height = 800
         WindowHelper.center_window(self.parent, width, height)
 
         main_container = tk.Frame(self.parent, bg=self.widgets.bg_color)
         main_container.pack(fill="both", expand=True, padx=20, pady=20)
 
-        # --- HEADER ---
         header_frame = tk.Frame(main_container, bg=self.widgets.bg_color)
         header_frame.pack(fill="x", pady=(0, 20))
 
@@ -76,7 +74,6 @@ class MFASetupWizard:
         )
         self.progress_bar.pack(fill="x", padx=40)
 
-        # --- ÁREA DE CONTENIDO (Scrollable) ---
         canvas = tk.Canvas(
             main_container, bg=self.widgets.bg_color, highlightthickness=0
         )
@@ -117,7 +114,6 @@ class MFASetupWizard:
         )
         canvas.bind("<Leave>", lambda _: canvas.unbind_all("<MouseWheel>"))
 
-        # --- BOTONES DE NAVEGACIÓN ---
         self.back_btn = self.widgets.create_modern_button(
             self.nav_frame,
             "⬅️ Anterior",
@@ -281,7 +277,6 @@ class MFASetupWizard:
         self.user_profile = {"display_name": dname, "is_anonymous": anon}
         return True
 
-    # --- PASO 2: BIENVENIDA (ACTUALIZADO CON EXPLICACIÓN) ---
     def create_welcome_step(self):
         self._step_header(
             f"Hola, {self.user_profile['display_name']}",
@@ -293,7 +288,6 @@ class MFASetupWizard:
         )
         info_card.pack(fill="x", pady=10)
 
-        # ✅ NUEVO: ¿Qué es MFA?
         tk.Label(
             info_card,
             text="¿Qué es MFA?",
@@ -316,7 +310,6 @@ class MFASetupWizard:
             justify="left",
         ).pack(pady=(5, 15))
 
-        # ¿Por qué usarlo?
         tk.Label(
             info_card,
             text="¿Por qué lo necesitamos?",
@@ -338,7 +331,6 @@ class MFASetupWizard:
             justify="left",
         ).pack(pady=(5, 0))
 
-        # Status
         tk.Label(
             self.content_frame,
             text="Estado Actual:",
@@ -370,7 +362,6 @@ class MFASetupWizard:
                 side="left", padx=10
             )
 
-    # --- PASO 3: TOTP (ACTUALIZADO CON EXPLICACIÓN QR) ---
     def create_totp_step(self):
         self._step_header(
             "📱 Autenticación Móvil", "Usa tu celular como llave de acceso"
@@ -380,11 +371,9 @@ class MFASetupWizard:
             self._show_totp_success()
             return
 
-        # Info Card con explicación didáctica
         card = tk.Frame(self.content_frame, bg=self.widgets.card_bg, padx=20, pady=20)
         card.pack(fill="x", pady=10)
 
-        # ✅ NUEVO: Explicación didáctica
         tk.Label(
             card,
             text="¿Qué es el Código QR?",
@@ -594,7 +583,6 @@ class MFASetupWizard:
             win, "He guardado los códigos", win.destroy, self.widgets.success_color
         ).pack(pady=20)
 
-    # --- PASO 4: USB (ACTUALIZADO CON EXPLICACIÓN SEGURIDAD) ---
     def create_usb_bypass_step(self):
         self._step_header("💾 Bypass USB (Opcional)", "Máxima seguridad física")
         from modules.auth.usb_bypass import USBBypass
@@ -604,7 +592,6 @@ class MFASetupWizard:
         card = tk.Frame(self.content_frame, bg=self.widgets.card_bg, padx=20, pady=20)
         card.pack(fill="x", pady=10)
 
-        # ✅ NUEVO: Explicación de valor
         tk.Label(
             card,
             text="Tu Llave Física Maestra",
@@ -722,7 +709,6 @@ class MFASetupWizard:
             win, "Guardar Configuración", save, self.widgets.success_color
         ).pack(pady=20)
 
-    # --- PASO 5: RESUMEN (ACTUALIZADO CON CRÉDITOS) ---
     def create_summary_step(self):
         self._step_header("✅ Todo Listo", "Tu bóveda está segura")
 
@@ -754,7 +740,6 @@ class MFASetupWizard:
             fg=self.widgets.text_secondary,
         ).pack(pady=10)
 
-        # ✅ NUEVO: Footer con créditos en pequeño
         footer_frame = tk.Frame(self.content_frame, bg=self.widgets.bg_color)
         footer_frame.pack(side="bottom", pady=20)
 
@@ -767,7 +752,7 @@ class MFASetupWizard:
         ).pack()
 
         def open_repo():
-            webbrowser.open("https://github.com/LoremRoman/BIGestPwd")  # Tu repositorio
+            webbrowser.open("https://github.com/LoremRoman/BIGestPwd")
 
         repo_link = tk.Label(
             footer_frame,

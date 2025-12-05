@@ -6,7 +6,6 @@ import os
 
 class ModernWidgets:
     def __init__(self):
-        # Paleta de Colores
         self.bg_color = "#0a0a0a"
         self.card_bg = "#1a1a1a"
         self.input_bg = "#2d2d2d"
@@ -16,19 +15,14 @@ class ModernWidgets:
         self.warning_color = "#f59e0b"
         self.text_primary = "#ffffff"
         self.text_secondary = "#94a3b8"
-
-        # Cache de imágenes para evitar que el recolector de basura las elimine
         self.image_cache = {}
 
     def get_icon_image(self, size=(32, 32)):
-        """Carga el icono de la app como imagen redimensionada"""
         try:
-            # Buscar el icono en la raíz del proyecto
             base_path = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
             icon_path = os.path.join(base_path, "icon.ico")
 
             if not os.path.exists(icon_path):
-                # Intentar ruta relativa simple si falla la absoluta
                 icon_path = "icon.ico"
 
             if os.path.exists(icon_path):

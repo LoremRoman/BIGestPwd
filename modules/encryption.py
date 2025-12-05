@@ -7,12 +7,10 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 
-# --- CONFIGURACIÓN DE RUTA DE DATOS ---
 DATA_DIR = os.path.join(os.getcwd(), "data")
 if not os.path.exists(DATA_DIR):
     try:
         os.makedirs(DATA_DIR)
-        # Ocultar carpeta en Windows
         if os.name == "nt":
             import ctypes
 
@@ -21,7 +19,6 @@ if not os.path.exists(DATA_DIR):
         pass
 
 DB_PATH = os.path.join(DATA_DIR, "bigestpwd_secure.db")
-# --------------------------------------
 
 
 class SecureEncryption:
@@ -98,7 +95,7 @@ class SecureEncryption:
 class DatabaseManager:
     def __init__(self, encryption_system: SecureEncryption):
         self.encryption = encryption_system
-        self.db_path = DB_PATH  # ✅ USA LA RUTA EN CARPETA DATA
+        self.db_path = DB_PATH
         self.db_lock = threading.Lock()
         self.setup_database()
         self.repair_database_tables()
@@ -149,17 +146,28 @@ class DatabaseManager:
             try:
                 with self._get_connection() as conn:
                     cursor = conn.cursor()
+
                     cursor.execute("PRAGMA table_info(totp_secrets)")
-                    columns = [column[1] for column in cursor.fetchall()]
-                    if "backup_codes" not in columns:
+                    columns_totp = [column[1] for column in cursor.fetchall()]
+                    if "backup_codes" not in columns_totp:
                         cursor.execute(
                             "ALTER TABLE totp_secrets ADD COLUMN backup_codes BLOB"
                         )
                         cursor.execute(
                             "ALTER TABLE totp_secrets ADD COLUMN backup_salt BLOB"
                         )
-                        conn.commit()
-            except:
+
+                    cursor.execute("PRAGMA table_info(password_entries)")
+                    columns_pwd = [column[1] for column in cursor.fetchall()]
+
+                    if "updated_at" not in columns_pwd:
+                        cursor.execute(
+                            "ALTER TABLE password_entries ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP"
+                        )
+
+                    conn.commit()
+            except Exception as e:
+                print(f"Error en reparación de DB: {e}")
                 pass
 
     def is_master_configured(self) -> bool:
@@ -278,7 +286,7 @@ class DatabaseManager:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    """SELECT p.id, c.name, c.color, p.title, p.username, p.encrypted_password, p.password_salt, p.url, p.notes, p.notes_salt, p.created_at FROM password_entries p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.title"""
+                    """SELECT p.id, c.name, c.color, p.title, p.username, p.encrypted_password, p.password_salt, p.url, p.notes, p.notes_salt, p.created_at, p.updated_at FROM password_entries p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.title"""
                 )
                 rows = cursor.fetchall()
 
@@ -293,6 +301,9 @@ class DatabaseManager:
                         decrypted_notes = self.encryption.decrypt_data(
                             row[8], row[9], master_password
                         )
+
+                    date_to_use = row[11] if row[11] else row[10]
+
                     entries.append(
                         {
                             "id": row[0],
@@ -303,7 +314,7 @@ class DatabaseManager:
                             "password": decrypted_password,
                             "url": row[7],
                             "notes": decrypted_notes,
-                            "created_at": row[10],
+                            "date_for_check": date_to_use,
                         }
                     )
                 except:

@@ -8,22 +8,18 @@ from modules.components.widgets import ModernWidgets  # ✅ Importamos los estil
 class VirtualKeyboard:
     def __init__(self, parent):
         self.parent = parent
-        self.widgets = ModernWidgets()  # ✅ Iniciamos los estilos
+        self.widgets = ModernWidgets()
 
     def create_keyboard(self, target_entry):
         """Abre el teclado virtual nativo de Windows de forma segura"""
         try:
             if os.name == "nt":
-                # Intenta varios métodos para abrir el teclado en Windows
                 try:
-                    # Método 1: Ruta directa (funciona en la mayoría de 64bits)
                     if os.path.exists("C:\\Windows\\System32\\osk.exe"):
                         subprocess.Popen("C:\\Windows\\System32\\osk.exe", shell=True)
                     else:
-                        # Método 2: Comando directo
                         os.system("start osk")
                 except:
-                    # Método 3: Fallback básico
                     os.system("start osk")
             else:
                 self.show_custom_message(
@@ -32,7 +28,6 @@ class VirtualKeyboard:
                     "Por favor, ábrelo manualmente en tu sistema.",
                 )
         except Exception as e:
-            # Fallback manual con instrucciones claras
             self.show_custom_message(
                 "No se pudo abrir automáticamente",
                 "Para abrir el Teclado en Pantalla manualmente:\n\n"
@@ -42,22 +37,18 @@ class VirtualKeyboard:
             )
 
     def show_custom_message(self, title, message):
-        """Muestra un mensaje estilizado con ModernWidgets"""
         msg_window = tk.Toplevel(self.parent)
         msg_window.title(title)
-        msg_window.configure(bg=self.widgets.bg_color)  # ✅ Color consistente
+        msg_window.configure(bg=self.widgets.bg_color)
 
-        # Tamaño dinámico pero contenido
         msg_window.minsize(400, 250)
         msg_window.transient(self.parent)
 
-        # Frame con padding
         main_frame = tk.Frame(msg_window, bg=self.widgets.bg_color, padx=20, pady=20)
         main_frame.pack(fill="both", expand=True)
 
         WindowHelper.center_window(msg_window, 400, 250)
 
-        # Icono
         tk.Label(
             main_frame,
             text="⌨️",
@@ -66,7 +57,6 @@ class VirtualKeyboard:
             fg=self.widgets.accent_color,
         ).pack(pady=(10, 15))
 
-        # Mensaje
         tk.Label(
             main_frame,
             text=message,
@@ -77,7 +67,6 @@ class VirtualKeyboard:
             justify="center",
         ).pack(pady=10)
 
-        # Botón con estilo moderno
         self.widgets.create_modern_button(
             main_frame,
             "Entendido",

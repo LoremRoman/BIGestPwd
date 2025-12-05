@@ -6,17 +6,15 @@ from pathlib import Path
 
 
 def build_final():
-    print("INICIANDO COMPILACIÓN DE BIGestPwd 2.4...")
+    print("INICIANDO COMPILACIÓN DE BIGestPwd 2.5...")
 
-    # 1. Configurar rutas
     base_dir = Path(__file__).parent
     main_script = base_dir / "main.py"
     icon_file = base_dir / "icon.ico"
-    license_file = base_dir / "LICENSE.txt"
+    license_file = base_dir / "LICENSE"
     dist_dir = base_dir / "dist"
     build_dir = base_dir / "build"
 
-    # 2. Verificaciones
     if not main_script.exists():
         print("❌ Error: No se encuentra main.py")
         return
@@ -54,7 +52,7 @@ def build_final():
         "--onefile",
         "--windowed",
         "--clean",
-        "--name=BIGestPwd_2.4",
+        "--name=BIGestPwd_2.5",
         "--hidden-import=PIL",
         "--hidden-import=PIL._tkinter_finder",
         "--hidden-import=sqlite3",
@@ -80,7 +78,7 @@ def build_final():
 
         print(f"\n✅ Compilación finalizada en {end_time - start_time:.2f} segundos.")
 
-        exe_path = dist_dir / "BIGestPwd_2.4.exe"
+        exe_path = dist_dir / "BIGestPwd_2.5.exe"
 
         if exe_path.exists():
             size_mb = exe_path.stat().st_size / (1024 * 1024)

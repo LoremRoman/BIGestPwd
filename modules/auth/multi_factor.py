@@ -1,10 +1,8 @@
 import sqlite3
 import os
 
-# --- PATH DE LA BD ---
 DATA_DIR = os.path.join(os.getcwd(), "data")
 DEFAULT_DB_PATH = os.path.join(DATA_DIR, "bigestpwd_secure.db")
-# ---------------------
 
 
 class MultiFactorAuth:

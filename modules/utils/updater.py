@@ -6,12 +6,8 @@ import threading
 import tempfile
 from tkinter import messagebox
 from packaging import version
-import webbrowser  # ✅ Necesario para abrir el link
-
-# CONFIGURACIÓN
-REPO_OWNER = "LoremRoman"
-REPO_NAME = "BIGestPwd"
-CURRENT_VERSION = "2.4"
+import webbrowser
+from modules.config import APP_VERSION as CURRENT_VERSION, REPO_OWNER, REPO_NAME
 
 
 class AppUpdater:
@@ -24,7 +20,6 @@ class AppUpdater:
         self.on_finish = on_finish_check
 
     def check_for_updates(self):
-        """Inicia el chequeo en un hilo separado"""
         if self.on_start:
             self.on_start()
 
@@ -33,7 +28,6 @@ class AppUpdater:
 
     def _check_logic(self):
         try:
-            # 1. Consultar GitHub
             response = requests.get(self.api_url, timeout=5)
             if response.status_code != 200:
                 self.root.after(
@@ -45,13 +39,11 @@ class AppUpdater:
             latest_tag = data.get("tag_name", "0.0").replace("v", "")
             html_url = data.get(
                 "html_url", f"https://github.com/{REPO_OWNER}/{REPO_NAME}"
-            )  # ✅ Link del release
+            )
 
-            # 2. Comparar versiones
             if version.parse(latest_tag) > version.parse(CURRENT_VERSION):
                 download_url = self._get_exe_url(data)
                 if download_url:
-                    # Pasamos el html_url también
                     self.root.after(
                         0,
                         lambda: self._confirm_update(
@@ -90,7 +82,6 @@ class AppUpdater:
     def _confirm_update(self, ver, exe_url, notes, release_url):
         msg = f"¡Versión v{ver} disponible!\n\n{notes}\n\n¿Descargar e instalar ahora?"
         if messagebox.askyesno("Actualización", msg, parent=self.root):
-            # ✅ Abrir el navegador con las notas de la versión antes de cerrar
             webbrowser.open(release_url)
             self._download_and_install(exe_url)
 
