@@ -1,4 +1,4 @@
-# 🛡️ BIGestPwd 2.4
+# 🛡️ BIGestPwd 2.5
 
 > **Secure. Open Source. Free. Always.**
 
