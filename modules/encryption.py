@@ -136,9 +136,40 @@ class DatabaseManager:
                 cursor.execute(
                     """CREATE TABLE IF NOT EXISTS password_entries (id INTEGER PRIMARY KEY, category_id INTEGER, title TEXT NOT NULL, username TEXT, encrypted_password BLOB NOT NULL, password_salt BLOB NOT NULL, url TEXT, notes BLOB, notes_salt BLOB, strength INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (category_id) REFERENCES categories(id))"""
                 )
+
                 cursor.execute(
                     """CREATE TABLE IF NOT EXISTS totp_secrets (id INTEGER PRIMARY KEY, service_name TEXT DEFAULT 'BIGestPwd', encrypted_secret BLOB NOT NULL, secret_salt BLOB NOT NULL, backup_codes BLOB, backup_salt BLOB, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""
                 )
+
+                cursor.execute(
+                    """CREATE TABLE IF NOT EXISTS mfa_config (id INTEGER PRIMARY KEY, method_name TEXT NOT NULL UNIQUE, is_enabled BOOLEAN DEFAULT 0, is_configured BOOLEAN DEFAULT 0, config_data BLOB, config_salt BLOB, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                )
+
+                cursor.execute(
+                    """CREATE TABLE IF NOT EXISTS user_profile (id INTEGER PRIMARY KEY, display_name TEXT NOT NULL, is_anonymous BOOLEAN DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                )
+
+                mfa_methods = [
+                    ("master_password", 1, 1),
+                    ("totp_offline", 0, 0),
+                    ("usb_bypass", 0, 0),
+                ]
+                for method_name, is_enabled, is_configured in mfa_methods:
+                    cursor.execute(
+                        "INSERT OR IGNORE INTO mfa_config (method_name, is_enabled, is_configured) VALUES (?, ?, ?)",
+                        (method_name, is_enabled, is_configured),
+                    )
+
+                cursor.execute(
+                    """CREATE TABLE IF NOT EXISTS usb_devices (id INTEGER PRIMARY KEY, device_name TEXT NOT NULL, device_uuid TEXT UNIQUE NOT NULL, device_path TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, last_seen DATETIME DEFAULT CURRENT_TIMESTAMP, is_active BOOLEAN DEFAULT 1)"""
+                )
+                cursor.execute(
+                    """CREATE TABLE IF NOT EXISTS usb_security_files (id INTEGER PRIMARY KEY, device_uuid TEXT NOT NULL, file_name TEXT NOT NULL, encrypted_data BLOB NOT NULL, file_salt BLOB NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (device_uuid) REFERENCES usb_devices(device_uuid))"""
+                )
+                cursor.execute(
+                    """CREATE TABLE IF NOT EXISTS usb_blacklist (id INTEGER PRIMARY KEY, device_uuid TEXT UNIQUE NOT NULL, device_name TEXT NOT NULL, revoked_at DATETIME DEFAULT CURRENT_TIMESTAMP, cleaned BOOLEAN DEFAULT 0, reason TEXT DEFAULT 'Usuario eliminó dispositivo')"""
+                )
+
                 conn.commit()
 
     def repair_database_tables(self):

@@ -1,7 +1,17 @@
 import tkinter as tk
-from modules.components.widgets import ModernWidgets
-from datetime import datetime, timedelta
+import sys
+import os
+import ctypes
+from datetime import datetime
 import re
+
+try:
+    import win32api
+    import win32con
+except ImportError:
+    pass
+
+from modules.components.widgets import ModernWidgets
 
 
 class WindowHelper:
@@ -24,8 +34,12 @@ class WindowHelper:
         msg_window.configure(bg=widgets.bg_color)
         msg_window.minsize(380, 200)
         msg_window.resizable(False, False)
-        msg_window.transient(parent)
-        msg_window.grab_set()
+
+        if parent:
+            msg_window.transient(parent)
+            msg_window.grab_set()
+        else:
+            msg_window.attributes("-topmost", True)
 
         main_frame = tk.Frame(msg_window, bg=widgets.bg_color, padx=20, pady=20)
         main_frame.pack(fill="both", expand=True)
@@ -61,6 +75,54 @@ class WindowHelper:
         WindowHelper.center_window(msg_window, width, height)
         msg_window.focus_force()
         return msg_window
+
+    @staticmethod
+    def manage_windows_startup(enable=True):
+        app_name = "BIGestPwd"
+        try:
+            key = win32api.RegOpenKeyEx(
+                win32con.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Run",
+                0,
+                win32con.KEY_ALL_ACCESS,
+            )
+
+            if enable:
+                if getattr(sys, "frozen", False):
+                    app_path = f'"{sys.executable}"'
+                else:
+                    python_exe = sys.executable.replace("python.exe", "pythonw.exe")
+                    script_path = os.path.abspath(sys.argv[0])
+                    app_path = f'"{python_exe}" "{script_path}"'
+
+                win32api.RegSetValueEx(key, app_name, 0, win32con.REG_SZ, app_path)
+            else:
+                try:
+                    win32api.RegDeleteValue(key, app_name)
+                except FileNotFoundError:
+                    pass
+
+            win32api.RegCloseKey(key)
+            return True
+        except Exception as e:
+            print(f"Error gestionando inicio de Windows: {e}")
+            return False
+
+    @staticmethod
+    def set_display_affinity(window, enable=True):
+        try:
+            WDA_NONE = 0x00000000
+            WDA_MONITOR = 0x00000001
+            hwnd = ctypes.windll.user32.GetParent(window.winfo_id())
+            if not hwnd:
+                hwnd = window.winfo_id()
+
+            value = WDA_MONITOR if enable else WDA_NONE
+            ctypes.windll.user32.SetWindowDisplayAffinity(hwnd, value)
+            return True
+        except Exception as e:
+            print(f"Error estableciendo afinidad de pantalla: {e}")
+            return False
 
 
 class PasswordHealth:
@@ -102,7 +164,7 @@ class PasswordHealth:
         score, strength_text, strength_color, strength_emoji = (
             PasswordHealth.assess_strength(password)
         )
-        
+
         try:
             if not date_str:
                 date_obj = datetime.now()

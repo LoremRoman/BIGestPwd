@@ -102,7 +102,6 @@ class PasswordGeneratorModal:
             cursor="hand2",
         ).pack(side="left", padx=5)
 
-        # CONTROLES
         controls_frame = tk.LabelFrame(
             main_container,
             text="Personalización",
@@ -250,7 +249,6 @@ class PasswordGeneratorModal:
 
         if not characters:
             self.password_var.set("Seleccione opciones")
-            # score 0 por defecto
             self.security_indicator.config(text="⚪", fg="#6b7280")
             self.security_label.config(text="Vacía", fg="#6b7280")
             return

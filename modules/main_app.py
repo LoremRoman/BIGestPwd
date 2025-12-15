@@ -1,6 +1,9 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, Menu
 import webbrowser
+import json
+import os
+import time
 from modules.encryption import db_manager
 from modules.components.virtual_keyboard import VirtualKeyboard
 from modules.components.modals import PasswordGeneratorModal, PasswordEditModal
@@ -11,27 +14,45 @@ from modules.components.security_modals import (
 )
 from modules.components.widgets import ModernWidgets
 from modules.utils.helpers import WindowHelper, PasswordHealth, Tooltip
+from modules.utils.clipboard_security import ClipboardManager
 from modules.auth.multi_factor import MultiFactorAuth
 from modules.auth.totp_offline import TOTPOffline
 from modules.auth.usb_bypass import USBBypass
 from modules.utils.updater import AppUpdater
 
+SETTINGS_FILE = os.path.join(os.getcwd(), "data", "settings.json")
+
 
 class MainApplication:
-    def __init__(self, root, master_password):
+    def __init__(self, root, master_password, on_logout_callback=None):
         self.root = root
         self.master_password = master_password
+        self.on_logout_callback = on_logout_callback
         self.virtual_kb = VirtualKeyboard(root)
         self.widgets = ModernWidgets()
         self.mfa = MultiFactorAuth()
         self.totp = TOTPOffline()
         self.usb = USBBypass()
+        self.clipboard_manager = ClipboardManager(root)
         self.tooltip = Tooltip(root)
         self.password_health_data = {}
         self.current_search = ""
         self.selected_item = None
         self.user_profile = self.mfa.get_user_profile()
-        self.root.title("BIGestPwd 2.5 - Gestor Principal")
+
+        self.last_menu_close_time = 0
+        self.btn_settings = None
+
+        self.settings = {
+            "start_with_windows": False,
+            "minimize_to_tray": True,
+            "afk_lock": True,
+            "clean_clipboard": True,
+            "privacy_mode": False,
+        }
+        self.load_settings()
+
+        self.root.title("BIGestPwd 2.8 - Gestor Principal")
         self.root.configure(bg=self.widgets.bg_color)
 
         try:
@@ -39,10 +60,31 @@ class MainApplication:
         except:
             pass
 
+        self.apply_initial_settings()
         self.setup_styles()
         self.create_interface()
         self.load_categories()
         self.load_passwords()
+
+    def load_settings(self):
+        try:
+            if os.path.exists(SETTINGS_FILE):
+                with open(SETTINGS_FILE, "r") as f:
+                    saved = json.load(f)
+                    self.settings.update(saved)
+        except:
+            pass
+
+    def save_settings(self):
+        try:
+            with open(SETTINGS_FILE, "w") as f:
+                json.dump(self.settings, f)
+        except:
+            pass
+
+    def apply_initial_settings(self):
+        if self.settings["privacy_mode"]:
+            WindowHelper.set_display_affinity(self.root, True)
 
     def setup_styles(self):
         self.style = self.widgets.setup_treeview_style()
@@ -124,6 +166,11 @@ class MainApplication:
         btn_frame = tk.Frame(header, bg=self.widgets.bg_color)
         btn_frame.pack(side="right")
 
+        self.btn_settings = self.widgets.create_modern_button(
+            btn_frame, "⚙️", self.show_settings_menu, self.widgets.card_bg, width=4
+        )
+        self.btn_settings.pack(side="left", padx=(0, 5))
+
         self.btn_update = self.widgets.create_modern_button(
             btn_frame, "🔄 Actualizar", self.check_update, self.widgets.accent_color
         )
@@ -131,6 +178,73 @@ class MainApplication:
         self.widgets.create_modern_button(
             btn_frame, "🔒 Cerrar Sesión", self.logout, self.widgets.danger_color
         ).pack(side="left", padx=5)
+
+    def show_settings_menu(self):
+        current_time = time.time() * 1000
+        if current_time - self.last_menu_close_time < 300:
+            return
+
+        menu = Menu(
+            self.root,
+            tearoff=0,
+            bg=self.widgets.card_bg,
+            fg="white",
+            activebackground=self.widgets.accent_color,
+            activeforeground="white",
+            font=("Segoe UI", 10),
+        )
+
+        def get_lbl(text, key):
+            state = "🟢 ON" if self.settings[key] else "⚪ OFF"
+            return f"{text}   [{state}]"
+
+        menu.add_command(
+            label=get_lbl("🚀 Iniciar con Windows", "start_with_windows"),
+            command=lambda: self.toggle_setting("start_with_windows"),
+        )
+
+        menu.add_command(
+            label=get_lbl("❌ Minimizar al Cerrar", "minimize_to_tray"),
+            command=lambda: self.toggle_setting("minimize_to_tray"),
+        )
+
+        menu.add_command(
+            label=get_lbl("⏱️ Bloqueo Auto (AFK)", "afk_lock"),
+            command=lambda: self.toggle_setting("afk_lock"),
+        )
+
+        menu.add_command(
+            label=get_lbl("🧹 Limpiar Portapapeles", "clean_clipboard"),
+            command=lambda: self.toggle_setting("clean_clipboard"),
+        )
+
+        menu.add_separator()
+
+        menu.add_command(
+            label=get_lbl("👁️ Modo Confidencial", "privacy_mode"),
+            command=lambda: self.toggle_setting("privacy_mode"),
+        )
+
+        try:
+            x = self.btn_settings.winfo_rootx()
+            y = self.btn_settings.winfo_rooty() + self.btn_settings.winfo_height()
+
+            menu.tk_popup(x, y)
+        finally:
+            menu.grab_release()
+            self.last_menu_close_time = time.time() * 1000
+
+    def toggle_setting(self, key):
+        new_val = not self.settings[key]
+        self.settings[key] = new_val
+        self.save_settings()
+
+        if key == "start_with_windows":
+            WindowHelper.manage_windows_startup(new_val)
+        elif key == "privacy_mode":
+            WindowHelper.set_display_affinity(self.root, new_val)
+
+        self.root.after(50, self.show_settings_menu)
 
     def create_passwords_tab(self):
         tab = tk.Frame(self.notebook, bg=self.widgets.bg_color)
@@ -393,7 +507,7 @@ class MainApplication:
 
         tk.Label(
             center,
-            text="BIGestPwd 2.5",
+            text="BIGestPwd 2.8",
             font=("Segoe UI", 24, "bold"),
             bg=self.widgets.card_bg,
             fg="white",
@@ -485,8 +599,6 @@ class MainApplication:
         )
         self.status_label.pack(side="left", padx=10)
 
-    # --- Lógica de negocio ---
-
     def check_update(self):
         updater = AppUpdater(
             self.root,
@@ -549,8 +661,6 @@ class MainApplication:
 
             tag_name = f"status_{e['id']}"
             self.tree.item(item_id, tags=(str(e["id"]), tag_name))
-            self.tree.tag_configure(tag_name, foreground=color_code)
-
             self.tree.tag_configure(tag_name, foreground=color_code)
 
             count += 1
@@ -643,15 +753,23 @@ class MainApplication:
     def delete_selected_password(self):
         if not self.selected_item:
             return
-        id_ = int(self.tree.item(self.selected_item, "tags")[0])
-        title = self.tree.item(self.selected_item, "values")[
-            2
-        ]  # Título ahora es índice 2
-        if messagebox.askyesno("Eliminar", f"¿Eliminar '{title}'?", parent=self.root):
+
+        id_str = self.tree.item(self.selected_item, "tags")[0]
+        id_ = int(id_str)
+        entries = db_manager.get_password_entries(self.master_password)
+        entry_data = next((e for e in entries if e["id"] == id_), None)
+
+        title_to_show = entry_data["title"] if entry_data else "esta contraseña"
+
+        if messagebox.askyesno(
+            "Eliminar",
+            f"¿Estás seguro de eliminar '{title_to_show}'?",
+            parent=self.root,
+        ):
             if db_manager.delete_password_entry(id_):
                 self.load_passwords()
                 WindowHelper.show_custom_message(
-                    self.root, "Eliminado", "Contraseña eliminada"
+                    self.root, "Eliminado", "Contraseña eliminada correctamente"
                 )
             else:
                 WindowHelper.show_custom_message(
@@ -679,11 +797,12 @@ class MainApplication:
         TOTPManagementModal(self.root, self.master_password)
 
     def update_status(self, msg):
-        if hasattr(self, "status_label"):
+        if hasattr(self, "status_label") and self.status_label:
             self.status_label.config(text=f"Estado: {msg}")
 
     def logout(self):
         self.master_password = ""
-        for w in self.root.winfo_children():
-            w.destroy()
-        self.root.quit()
+        if self.on_logout_callback:
+            self.on_logout_callback()
+        else:
+            self.root.quit()

@@ -1,4 +1,26 @@
 RELEASE_NOTES = {
+    "2.8": [
+        {
+            "emoji": "👻",
+            "title": "Segundo Plano & Persistencia",
+            "desc": "Integración nativa con la bandeja del sistema (System Tray). Ahora puedes minimizar al reloj y configurar el 'Inicio Automático con Windows' para tener tus claves siempre listas.",
+        },
+        {
+            "emoji": "👁️",
+            "title": "Modo Confidencial (Anti-Spy)",
+            "desc": "Nueva protección de 'Afinidad de Pantalla'. Al activarlo, la ventana se vuelve invisible para capturas de pantalla, grabaciones y transmisiones (Zoom/Discord) para máxima privacidad.",
+        },
+        {
+            "emoji": "🎛️",
+            "title": "Centro de Control",
+            "desc": "Nuevo menú de configuración (⚙️). Personaliza el comportamiento de la app: Bloqueo AFK, limpieza de portapapeles, minimizado y arranque.",
+        },
+        {
+            "emoji": "🛡️",
+            "title": "Core Blindado & UX",
+            "desc": "Implementación de Mutex (Instancia Única), limpieza segura de memoria RAM al bloquear, nuevo actualizador visual y transiciones fluidas (Fade-in/out).",
+        },
+    ],
     "2.5": [
         {
             "emoji": "📍",

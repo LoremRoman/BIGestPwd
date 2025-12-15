@@ -25,7 +25,7 @@ class LoginSystemNew:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        self.root.title("BIGestPwd 2.5 - Login Seguro")
+        self.root.title("BIGestPwd 2.8 - Login Seguro")
         self.root.configure(bg=self.widgets.bg_color)
         self.root.resizable(True, True)
 

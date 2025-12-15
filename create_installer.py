@@ -4,13 +4,13 @@ from pathlib import Path
 
 
 def create_installer_final():
-    print("🎯 CREANDO INSTALADOR PROFESIONAL (BIGestPwd 2.5)...")
+    print("🎯 CREANDO INSTALADOR PROFESIONAL (BIGestPwd 2.8)...")
     print("=" * 60)
 
     project_dir = Path(__file__).parent
 
     required_files = [
-        ("dist/BIGestPwd_2.5.exe", "Ejecutable compilado"),
+        ("dist/BIGestPwd_2.8.exe", "Ejecutable compilado"),
         ("icon.ico", "Icono de la aplicación"),
         ("LICENSE", "Licencia de uso"),
     ]
@@ -32,15 +32,16 @@ def create_installer_final():
     print("\n📝 Paso 2: Generando script de Inno Setup (.iss)...")
 
     iss_content = f"""#define MyAppName "BIGestPwd"
-#define MyAppVersion "2.5"
+#define MyAppVersion "2.8"
 #define MyAppPublisher "BIGestPwd Security Team"
-#define MyAppExeName "BIGestPwd_2.5.exe"
+#define SourceExeName "BIGestPwd_2.8.exe"
+#define DestExeName "BIGestPwd.exe"
 
 [Setup]
-AppId={{{{B1G3STPWD-SECURE-VAULT-2024}}
+AppId={{{{B1G3STPWD-SECURE-VAULT-2024}}}}
 AppName={{#MyAppName}}
 AppVersion={{#MyAppVersion}}
-AppVerName={{#MyAppName}} 2.5
+AppVerName={{#MyAppName}} {{#MyAppVersion}}
 AppPublisher={{#MyAppPublisher}}
 DefaultDirName={{autopf}}\{{#MyAppName}}
 DefaultGroupName={{#MyAppName}}
@@ -53,7 +54,7 @@ Compression=lzma2/max
 SolidCompression=yes
 LicenseFile=LICENSE
 OutputDir=Output
-OutputBaseFilename=Instalador_BIGestPwd_2.5
+OutputBaseFilename=Instalador_BIGestPwd_2.8
 CloseApplications=yes
 RestartApplications=no
 
@@ -64,17 +65,17 @@ Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 Name: "desktopicon"; Description: "Crear acceso directo en el &Escritorio"; GroupDescription: "Iconos adicionales:"
 
 [Files]
-Source: "dist\{{#MyAppExeName}}"; DestDir: "{{app}}"; Flags: ignoreversion
+Source: "dist\{{#SourceExeName}}"; DestDir: "{{app}}"; DestName: "{{#DestExeName}}"; Flags: ignoreversion
 Source: "icon.ico"; DestDir: "{{app}}"; Flags: ignoreversion
 Source: "LICENSE"; DestDir: "{{app}}"; Flags: ignoreversion
 
 [Icons]
-Name: "{{group}}\{{#MyAppName}}"; Filename: "{{app}}\{{#MyAppExeName}}"; WorkingDir: "{{app}}"; IconFilename: "{{app}}\icon.ico"
+Name: "{{group}}\{{#MyAppName}}"; Filename: "{{app}}\{{#DestExeName}}"; WorkingDir: "{{app}}"; IconFilename: "{{app}}\icon.ico"
 Name: "{{group}}\Desinstalar {{#MyAppName}}"; Filename: "{{uninstallexe}}"
-Name: "{{autodesktop}}\{{#MyAppName}}"; Filename: "{{app}}\{{#MyAppExeName}}"; WorkingDir: "{{app}}"; IconFilename: "{{app}}\icon.ico"; Tasks: desktopicon
+Name: "{{autodesktop}}\{{#MyAppName}}"; Filename: "{{app}}\{{#DestExeName}}"; WorkingDir: "{{app}}"; IconFilename: "{{app}}\icon.ico"; Tasks: desktopicon
 
 [Run]
-Filename: "{{app}}\{{#MyAppExeName}}"; Description: "Ejecutar {{#MyAppName}} ahora"; Flags: nowait postinstall
+Filename: "{{app}}\{{#DestExeName}}"; Description: "Ejecutar {{#MyAppName}} ahora"; Flags: nowait postinstall
 """
 
     iss_path = project_dir / "installer_final.iss"
@@ -126,7 +127,7 @@ Filename: "{{app}}\{{#MyAppExeName}}"; Description: "Ejecutar {{#MyAppName}} aho
         return
 
     output_dir = project_dir / "Output"
-    setup_exe = output_dir / "Instalador_BIGestPwd_2.5.exe"
+    setup_exe = output_dir / "Instalador_BIGestPwd_2.8.exe"
 
     if setup_exe.exists():
         size_mb = setup_exe.stat().st_size / (1024 * 1024)
@@ -136,9 +137,9 @@ Filename: "{{app}}\{{#MyAppExeName}}"; Description: "Ejecutar {{#MyAppName}} aho
         print(f"📂 Ubicación: {setup_exe}")
         print(f"📏 Tamaño:    {size_mb:.2f} MB")
         print("\n🚀 CARACTERÍSTICAS:")
-        print("   ✓ Versión 2.5 Configurada")
-        print("   ✓ Ejecutable actualizado")
-        print("   ✓ Datos seguros")
+        print("   ✓ Versión 2.8 Configurada")
+        print("   ✓ Estandarización de nombre (BIGestPwd.exe)")
+        print("   ✓ Acceso directo limpio")
         print("\n👉 Todo listo para subir el Release a GitHub.")
 
         try:

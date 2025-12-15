@@ -19,24 +19,6 @@ class USBBypass:
         self.db_path = db_path if db_path else DEFAULT_DB_PATH
         self.file_encryption = FileEncryption()
         self.db_lock = threading.Lock()
-        self.setup_usb_tables()
-
-    def setup_usb_tables(self):
-        with self.db_lock:
-            with sqlite3.connect(
-                self.db_path, check_same_thread=False, timeout=30.0
-            ) as conn:
-                cursor = conn.cursor()
-                cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS usb_devices (id INTEGER PRIMARY KEY, device_name TEXT NOT NULL, device_uuid TEXT UNIQUE NOT NULL, device_path TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, last_seen DATETIME DEFAULT CURRENT_TIMESTAMP, is_active BOOLEAN DEFAULT 1)"""
-                )
-                cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS usb_security_files (id INTEGER PRIMARY KEY, device_uuid TEXT NOT NULL, file_name TEXT NOT NULL, encrypted_data BLOB NOT NULL, file_salt BLOB NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (device_uuid) REFERENCES usb_devices(device_uuid))"""
-                )
-                cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS usb_blacklist (id INTEGER PRIMARY KEY, device_uuid TEXT UNIQUE NOT NULL, device_name TEXT NOT NULL, revoked_at DATETIME DEFAULT CURRENT_TIMESTAMP, cleaned BOOLEAN DEFAULT 0, reason TEXT DEFAULT 'Usuario eliminó dispositivo')"""
-                )
-                conn.commit()
 
     def detect_real_usb_devices(self):
         if not psutil:

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import secrets
 import pyotp
-import webbrowser  # ✅ Importado para el link del repositorio
+import webbrowser
 from modules.auth.multi_factor import MultiFactorAuth
 from modules.auth.totp_offline import TOTPOffline
 from modules.utils.helpers import WindowHelper
@@ -25,7 +25,7 @@ class MFASetupWizard:
         self.setup_wizard()
 
     def setup_wizard(self):
-        self.parent.title("Configuración de Seguridad - BIGestPwd 2.5")
+        self.parent.title("Configuración de Seguridad - BIGestPwd 2.8")
         self.parent.configure(bg=self.widgets.bg_color)
 
         width = 750
@@ -176,7 +176,6 @@ class MFASetupWizard:
         if self.current_step > 0:
             self.show_step(self.current_step - 1)
 
-    # --- PASO 1: PERFIL ---
     def create_profile_step(self):
         self._step_header(
             "👤 Configurar Perfil", "Elige cómo te identificarás en la aplicación"
@@ -426,7 +425,6 @@ class MFASetupWizard:
             width=25,
         ).pack(pady=15)
 
-        # Verificación
         tk.Label(
             self.content_frame,
             text="Verificar Código:",
@@ -501,7 +499,7 @@ class MFASetupWizard:
         import io
 
         img = Image.open(io.BytesIO(qr_img))
-        img = img.resize((300, 300))  # Ajustar tamaño para que quepa bien
+        img = img.resize((300, 300))
         photo = ImageTk.PhotoImage(img)
 
         tk.Label(

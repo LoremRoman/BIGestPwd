@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 def build_final():
-    print("INICIANDO COMPILACIÓN DE BIGestPwd 2.5...")
+    print("INICIANDO COMPILACIÓN DE BIGestPwd 2.8...")
 
     base_dir = Path(__file__).parent
     main_script = base_dir / "main.py"
@@ -52,13 +52,19 @@ def build_final():
         "--onefile",
         "--windowed",
         "--clean",
-        "--name=BIGestPwd_2.5",
+        "--name=BIGestPwd_2.8",
         "--hidden-import=PIL",
         "--hidden-import=PIL._tkinter_finder",
         "--hidden-import=sqlite3",
         "--hidden-import=requests",
         "--hidden-import=packaging",
         "--hidden-import=packaging.version",
+        "--hidden-import=pystray",
+        "--hidden-import=win32api",
+        "--hidden-import=win32con",
+        "--hidden-import=win32event",
+        "--hidden-import=winerror",
+        "--hidden-import=ctypes",
     ]
 
     cmd.extend(icon_arg)
@@ -68,7 +74,7 @@ def build_final():
     cmd.append(str(main_script))
 
     print("\n🔨 Ejecutando PyInstaller...")
-    print("   (Incluyendo soporte para actualizaciones automáticas)")
+    print("   (Incluyendo soporte para System Tray, WinAPI y Auto-Update)")
     print("\n⏳ Compilando... (Esto puede tardar unos minutos)\n")
 
     try:
@@ -78,7 +84,7 @@ def build_final():
 
         print(f"\n✅ Compilación finalizada en {end_time - start_time:.2f} segundos.")
 
-        exe_path = dist_dir / "BIGestPwd_2.5.exe"
+        exe_path = dist_dir / "BIGestPwd_2.8.exe"
 
         if exe_path.exists():
             size_mb = exe_path.stat().st_size / (1024 * 1024)

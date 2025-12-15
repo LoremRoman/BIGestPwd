@@ -25,7 +25,7 @@ class FileEncryption:
         return base64.urlsafe_b64encode(key)
 
     def generate_salt(self) -> bytes:
-        return os.urandom(16)
+        return os.urandom(32)
 
     def encrypt_file(self, data: str, password: str) -> tuple[bytes, bytes]:
         salt = self.generate_salt()
@@ -49,8 +49,8 @@ class FileEncryption:
 
             return decrypted_data.decode("utf-8")
 
-        except Exception as e:
-            raise ValueError("Contraseña incorrecta o archivo corrupto")
+        except Exception:
+            raise ValueError("Fallo de desencriptación")
 
     def validate_encryption_key(
         self, encrypted_data: bytes, salt: bytes, password: str
@@ -104,10 +104,22 @@ class FileEncryption:
 
         try:
             with open(file_path, "rb") as f:
-                salt = f.read(16)
-                encrypted_data = f.read()
+                content = f.read()
 
-            return self.decrypt_file(encrypted_data, salt, password)
+            try:
+                if len(content) > 32:
+                    salt_new = content[:32]
+                    data_new = content[32:]
+                    return self.decrypt_file(data_new, salt_new, password)
+            except ValueError:
+                pass
+
+            if len(content) > 16:
+                salt_old = content[:16]
+                data_old = content[16:]
+                return self.decrypt_file(data_old, salt_old, password)
+
+            raise ValueError("Contraseña incorrecta o archivo corrupto")
 
         except Exception as e:
             raise ValueError(f"Error leyendo archivo seguro: {e}")

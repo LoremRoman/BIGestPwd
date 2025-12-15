@@ -11,7 +11,6 @@ class VirtualKeyboard:
         self.widgets = ModernWidgets()
 
     def create_keyboard(self, target_entry):
-        """Abre el teclado virtual nativo de Windows de forma segura"""
         try:
             if os.name == "nt":
                 try:

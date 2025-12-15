@@ -1,4 +1,4 @@
-# 🛡️ BIGestPwd 2.5
+# 🛡️ BIGestPwd 2.8
 
 > **Secure. Open Source. Free. Always.**
 
@@ -9,16 +9,31 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Stable-success?style=for-the-badge)
 
+<br><br>
+
+<!-- BOTÓN DE DESCARGA -->
+<a href="https://github.com/LoremRoman/BIGestPwd/releases/latest/download/Instalador_BIGestPwd_2.8.exe">
+  <img src="assets/download-windows.png" alt="Download for Windows" width="250">
+</a>
+<br>
+<sub><i>Requiere Windows 10/11</i></sub>
+
 </div>
 
 ---
 
-**BIGestPwd** es la evolución de tu gestor de contraseñas de escritorio. Diseñado bajo la filosofía **"Zero-Knowledge"**, garantiza que tus datos nunca salgan de tu dispositivo sin estar fuertemente encriptados. Ahora con sistema de **actualizaciones automáticas** y correcciones visuales.
+**BIGestPwd** es la evolución de tu gestor de contraseñas de escritorio. Diseñado bajo la filosofía **"Zero-Knowledge"**, garantiza que tus datos nunca salgan de tu dispositivo sin estar fuertemente encriptados. 
 
-## ✨ Novedades en v2.5
-*   🚀 **Sistema de Novedades** Nueva interfaz de bienvenida que te informará detalladamente de las mejoras cada vez que actualices.
-*   🧹 **Limpieza!:** Ahora, cuándo copias una contraseña, automáticamente después de 1 min borra tu portapapeles para eviar filtrar información de forma malintencionada.
-*   🧬 **Vida saludable para tus contraseñas!:** Dentro de tus contraseñas guardadas, ahora verás "Status" de tus contraseñas, para conocer si son seguras o su tiempo de vida es largo.
+Ahora cuenta con **ejecución en segundo plano**, protección contra espionaje y un sistema de **actualizaciones automáticas** modernizado.
+
+## ✨ Novedades en v2.8
+
+¡Esta actualización cambia la forma en que usas la aplicación!
+
+*   👻 **Modo Segundo Plano (System Tray):** La aplicación ya no se cierra, se minimiza en la bandeja del sistema (junto al reloj) para estar siempre lista.
+*   👁️ **Modo Confidencial (Anti-Spy):** Nueva tecnología que vuelve la ventana **invisible** ante capturas de pantalla, grabaciones o transmisiones (Zoom/Discord).
+*   ⏱️ **Protección AFK:** Si te alejas de tu PC por 15 minutos, cerramos tu sesión automáticamente y borramos la memoria RAM por seguridad.
+*   🎛️ **Centro de Control:** Nuevo menú de configuración (⚙️) para personalizar el arranque con Windows, limpieza de portapapeles y más.
 
 ---
 
@@ -26,9 +41,10 @@
 
 | Tecnología | Descripción |
 | :--- | :--- |
-| **AES-256 (Fernet)** | Estándar militar. Tus contraseñas y notas se encriptan antes de tocar el disco duro. |
-| **PBKDF2-HMAC** | Derivación de claves con 100,000 iteraciones y *salts* únicos para evitar fuerza bruta. |
+| **AES-256 (Fernet)** | Estándar robusto. Tus contraseñas y notas se encriptan antes de tocar el disco duro. |
+| **PBKDF2-HMAC** | Derivación de claves con 100,000 iteraciones y *salts* de 32 bytes únicos. |
 | **Zero-Knowledge** | La base de datos es inútil sin tu contraseña maestra. Nosotros no tenemos acceso a ella. |
+| **RAM Cleaning** | El portapapeles y las variables sensibles se purgan automáticamente. |
 
 ### 🛡️ Autenticación Multifactor (MFA)
 No te conformes solo con una contraseña. BIGestPwd ofrece seguridad por capas:
@@ -41,13 +57,12 @@ No te conformes solo con una contraseña. BIGestPwd ofrece seguridad por capas:
 ## 🎨 Galería
 
 <div align="center">
-  <img src="assets/about.jpg" width="60%" alt="Security" />
+  <img src="assets/about.jpg" width="60%" alt="Main Interface" style="border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.5);" />
 </div>
-
+<br>
 <div align="center">
-  <img src="assets/create_password.jpg" width="45%" alt="About" />
-  
-  <img src="assets/security.jpg" width="45%" alt="Create Password" />
+  <img src="assets/create_password.jpg" width="45%" alt="Create Password" style="border-radius: 10px;" />
+  <img src="assets/security.jpg" width="45%" alt="Security Options" style="border-radius: 10px;" />
 </div>
 
 ---
@@ -57,10 +72,10 @@ No te conformes solo con una contraseña. BIGestPwd ofrece seguridad por capas:
 ### 👤 Opción A: Usuario Final (Recomendado)
 El método más sencillo para empezar a proteger tus contraseñas.
 
-1. Ve a la sección de **[Releases](../../releases)** de este repositorio.
-2. Descarga el último instalador: `Instalador_BIGestPwd_2.5.exe`. (O la versión más actual)
-3. Ejecútalo e instala.
-4. **¡Listo!** Cuando haya una nueva versión, el botón "🔄 Actualizar" dentro de la app hará todo el trabajo por ti.
+1.  Haz clic en el botón de **Download for Windows** arriba 👆 o ve a la sección de **[Releases](../../releases)**.
+2.  Descarga el instalador `Instalador_BIGestPwd_2.8.exe`.
+3.  Ejecútalo e instala.
+4.  **¡Listo!** El programa se encargará de avisarte cuando haya nuevas versiones.
 
 ### 💻 Opción B: Desarrolladores (Código Fuente)
 Si deseas auditar el código, contribuir o compilarlo tú mismo:
