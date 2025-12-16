@@ -1,4 +1,21 @@
 RELEASE_NOTES = {
+    "2.8.3": [
+        {
+            "emoji": "📂",
+            "title": "Datos Persistentes (Safe Storage)",
+            "desc": "Tus contraseñas ahora se guardan en una bóveda segura del sistema (AppData). Tus datos están protegidos y seguros, incluso si desinstalas o mueves la aplicación.",
+        },
+        {
+            "emoji": "✨",
+            "title": "Migración Automática",
+            "desc": "El sistema detecta tus datos antiguos y los mueve silenciosamente a la nueva ubicación segura. ¡Actualiza sin miedo y sin perder nada!",
+        },
+        {
+            "emoji": "🚀",
+            "title": "Correcciones USB, TOTP y Más...",
+            "desc": "Solucionados los problemas de detección de llaves de seguridad y códigos 2FA. Hemos optimizado todo el núcleo. Visita el repositorio para ver el historial técnico completo.",
+        },
+    ],
     "2.8.2": [
         {
             "emoji": "✨",
