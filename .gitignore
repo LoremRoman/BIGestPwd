@@ -16,16 +16,12 @@ dist/
 # --- Inno Setup (Generado por create_installer.py) ---
 Output/
 *.iss
-# Agregamos *.iss porque tu script python lo genera automáticamente
-# y no queremos "basura" generada en el repositorio.
 
 # --- Bases de Datos y Estado Local (¡SEGURIDAD!) ---
 *.db
 *.sqlite
 *.sqlite3
 /data/
-# Excelente que ignores /data/. Esto protege tu DB real y también 
-# ignora el archivo version.json, lo cual es correcto (cada usuario debe tener su propio estado).
 
 # --- IDEs y Sistema Operativo ---
 .vscode/
