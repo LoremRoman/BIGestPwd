@@ -3,13 +3,14 @@ import sys
 import base64
 import sqlite3
 import threading
+import shutil
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 
 
-def get_base_path():
+def _get_old_base_path():
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     else:
@@ -17,19 +18,32 @@ def get_base_path():
         return os.path.dirname(current_dir)
 
 
-DATA_DIR = os.path.join(get_base_path(), "data")
+def get_persistent_data_path():
+    path = os.path.join(os.getenv("LOCALAPPDATA"), "BIGestPwd")
+    os.makedirs(path, exist_ok=True)
+    return path
 
-if not os.path.exists(DATA_DIR):
-    try:
-        os.makedirs(DATA_DIR)
-        if os.name == "nt":
-            import ctypes
 
-            ctypes.windll.kernel32.SetFileAttributesW(DATA_DIR, 2)
-    except:
-        pass
+def migrate_old_data():
+    old_data_path = os.path.join(_get_old_base_path(), "data")
+    new_data_path = get_persistent_data_path()
 
-DB_PATH = os.path.join(DATA_DIR, "bigestpwd_secure.db")
+    if os.path.exists(old_data_path) and old_data_path != new_data_path:
+        old_db_file = os.path.join(old_data_path, "bigestpwd_secure.db")
+        new_db_file = os.path.join(new_data_path, "bigestpwd_secure.db")
+
+        if os.path.exists(old_db_file) and not os.path.exists(new_db_file):
+            try:
+                shutil.copy2(old_db_file, new_db_file)
+                # Opcional: renombrar la carpeta antigua para evitar futuras migraciones
+                # os.rename(old_data_path, old_data_path + "_migrated")
+            except Exception as e:
+                pass
+
+
+migrate_old_data()
+
+DB_PATH = os.path.join(get_persistent_data_path(), "bigestpwd_secure.db")
 
 
 class SecureEncryption:
@@ -209,7 +223,6 @@ class DatabaseManager:
 
                     conn.commit()
             except Exception as e:
-                print(f"Error en reparación de DB: {e}")
                 pass
 
     def is_master_configured(self) -> bool:

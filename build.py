@@ -22,16 +22,13 @@ def build_final():
         return
 
     if not icon_file.exists():
-        print("⚠️ Advertencia: No se encuentra icon.ico (Se usará icono por defecto)")
         icon_arg = []
         data_arg_icon = []
     else:
-        print("✅ Icono encontrado.")
         icon_arg = [f"--icon={icon_file}"]
         data_arg_icon = [f"--add-data={icon_file};."]
 
     if license_file.exists():
-        print("✅ Licencia encontrada.")
         data_arg_license = [f"--add-data={license_file};."]
     else:
         data_arg_license = []
@@ -70,12 +67,10 @@ def build_final():
     cmd.extend(icon_arg)
     cmd.extend(data_arg_icon)
     cmd.extend(data_arg_license)
-    cmd.append("--add-data=data;data")
 
     cmd.append(str(main_script))
 
     print("\n🔨 Ejecutando PyInstaller...")
-    print("   (Incluyendo soporte para System Tray, WinAPI y Auto-Update)")
     print("\n⏳ Compilando... (Esto puede tardar unos minutos)\n")
 
     try:
@@ -94,13 +89,7 @@ def build_final():
             print(f"📂 Ubicación: {exe_path}")
             print(f"📏 Tamaño: {size_mb:.2f} MB")
             print("=" * 50)
-            print("\n¿Quieres probar el ejecutable ahora?")
-            resp = input(
-                "Escribe 's' para sí, cualquier otra tecla para salir: "
-            ).lower()
-            if resp == "s":
-                print("🚀 Lanzando aplicación...")
-                os.startfile(exe_path)
+
         else:
             print("❌ Error: El comando terminó pero no se encuentra el .exe")
 

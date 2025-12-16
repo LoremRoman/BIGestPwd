@@ -5,23 +5,10 @@ import winerror
 import sys
 import os
 import json
+import shutil
 from tkinter import ttk
 
-from modules.auth_system_new import LoginSystemNew as LoginSystem
-from modules.encryption import db_manager
-from modules.main_app import MainApplication
-from modules.components.virtual_keyboard import VirtualKeyboard
-from modules.utils.helpers import WindowHelper
-from modules.auth.multi_factor import MultiFactorAuth
-from modules.components.widgets import ModernWidgets
 from modules.config import APP_VERSION as CURRENT_VERSION
-from modules.release_notes import RELEASE_NOTES
-
-from modules.utils.afk_monitor import AFKMonitor
-from modules.utils.system_tray import AppTrayIcon
-from modules.utils.animator import WindowAnimator
-
-MUTEX_NAME = "BIGestPwd_SingleInstanceMutex"
 
 
 def get_app_path():
@@ -30,7 +17,58 @@ def get_app_path():
     return os.path.dirname(os.path.abspath(__file__))
 
 
-SETTINGS_FILE = os.path.join(get_app_path(), "data", "settings.json")
+def get_persistent_data_path():
+    path = os.path.join(os.getenv("LOCALAPPDDATA"), "BIGestPwd")
+    os.makedirs(path, exist_ok=True)
+    return path
+
+
+def get_resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+
+def migrate_old_data():
+    old_data_path = os.path.join(get_app_path(), "data")
+    new_data_path = get_persistent_data_path()
+
+    if os.path.exists(old_data_path) and old_data_path != new_data_path:
+        print(f"Detectada carpeta de datos antigua en: {old_data_path}. Migrando...")
+        try:
+            for filename in os.listdir(old_data_path):
+                old_file = os.path.join(old_data_path, filename)
+                new_file = os.path.join(new_data_path, filename)
+                if not os.path.exists(new_file):
+                    shutil.copy2(old_file, new_file)
+
+            os.rename(old_data_path, old_data_path + "_migrated")
+            print("¡Migración completada exitosamente!")
+        except Exception as e:
+            print(f"Error durante la migración de datos: {e}")
+
+
+migrate_old_data()
+
+DATA_PATH = get_persistent_data_path()
+SETTINGS_FILE = os.path.join(DATA_PATH, "settings.json")
+
+
+from modules.auth_system_new import LoginSystemNew as LoginSystem
+from modules.encryption import db_manager
+from modules.main_app import MainApplication
+from modules.components.virtual_keyboard import VirtualKeyboard
+from modules.utils.helpers import WindowHelper
+from modules.auth.multi_factor import MultiFactorAuth
+from modules.components.widgets import ModernWidgets
+from modules.release_notes import RELEASE_NOTES
+from modules.utils.afk_monitor import AFKMonitor
+from modules.utils.system_tray import AppTrayIcon
+from modules.utils.animator import WindowAnimator
+
+MUTEX_NAME = "BIGestPwd_SingleInstanceMutex"
 
 
 class BIGestPwdApp:
@@ -76,7 +114,7 @@ class BIGestPwdApp:
 
     def setup_system_tray(self):
         try:
-            icon_path = os.path.join(get_app_path(), "icon.ico")
+            icon_path = get_resource_path("icon.ico")
             self.tray_icon = AppTrayIcon(
                 f"BIGestPwd {CURRENT_VERSION}",
                 icon_path,
@@ -95,7 +133,7 @@ class BIGestPwdApp:
         self.root.minsize(500, 600)
 
         try:
-            icon_path = os.path.join(get_app_path(), "icon.ico")
+            icon_path = get_resource_path("icon.ico")
             self.root.iconbitmap(icon_path)
         except Exception as e:
             pass
@@ -119,7 +157,7 @@ class BIGestPwdApp:
             self.start_in_background()
 
     def is_new_version_update(self):
-        version_file = os.path.join(get_app_path(), "data", "version.json")
+        version_file = os.path.join(DATA_PATH, "version.json")
         try:
             if os.path.exists(version_file):
                 with open(version_file, "r") as f:
@@ -375,7 +413,7 @@ class BIGestPwdApp:
         self.check_version_and_show_news()
 
     def check_version_and_show_news(self):
-        version_file = os.path.join(get_app_path(), "data", "version.json")
+        version_file = os.path.join(DATA_PATH, "version.json")
         show_modal = False
 
         try:
