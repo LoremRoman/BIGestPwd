@@ -10,20 +10,31 @@ from tkinter import ttk
 
 from modules.config import APP_VERSION as CURRENT_VERSION
 
+# --- INICIO DE CORRECCIONES ---
+
 
 def get_app_path():
+    """Obtiene la ruta donde se está ejecutando el .exe."""
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))
 
 
 def get_persistent_data_path():
-    path = os.path.join(os.getenv("LOCALAPPDDATA"), "BIGestPwd")
+    """Obtiene la ruta a la carpeta de datos segura y persistente del usuario en AppData\Local."""
+    # CORRECCIÓN: Se eliminó la 'D' extra. Antes decía LOCALAPPDDATA
+    app_data = os.getenv("LOCALAPPDATA")
+    if not app_data:
+        # Respaldo por si la variable de entorno falla
+        app_data = os.path.expanduser(r"~\AppData\Local")
+
+    path = os.path.join(app_data, "BIGestPwd")
     os.makedirs(path, exist_ok=True)
     return path
 
 
 def get_resource_path(relative_path):
+    """Obtiene la ruta absoluta a un recurso (como icon.ico), funciona para desarrollo y para el .exe compilado."""
     try:
         base_path = sys._MEIPASS
     except Exception:
@@ -32,29 +43,52 @@ def get_resource_path(relative_path):
 
 
 def migrate_old_data():
+    """
+    Función de migración automática.
+    Revisa si existen datos en la ubicación antigua (junto al .exe) y los mueve a AppData.
+    Se ejecuta una sola vez.
+    """
     old_data_path = os.path.join(get_app_path(), "data")
     new_data_path = get_persistent_data_path()
 
-    if os.path.exists(old_data_path) and old_data_path != new_data_path:
-        print(f"Detectada carpeta de datos antigua en: {old_data_path}. Migrando...")
-        try:
-            for filename in os.listdir(old_data_path):
-                old_file = os.path.join(old_data_path, filename)
-                new_file = os.path.join(new_data_path, filename)
-                if not os.path.exists(new_file):
-                    shutil.copy2(old_file, new_file)
+    # Si la carpeta 'data' antigua existe y no estamos ya en AppData
+    if os.path.exists(old_data_path) and os.path.abspath(
+        old_data_path
+    ) != os.path.abspath(new_data_path):
+        # Verificar específicamente si hay una base de datos antigua que valga la pena mover
+        old_db = os.path.join(old_data_path, "bigestpwd_secure.db")
+        if os.path.exists(old_db):
+            print(
+                f"Detectada carpeta de datos antigua en: {old_data_path}. Migrando..."
+            )
+            try:
+                # Copia cada archivo de la carpeta vieja a la nueva
+                for filename in os.listdir(old_data_path):
+                    old_file = os.path.join(old_data_path, filename)
+                    new_file = os.path.join(new_data_path, filename)
+                    if not os.path.exists(
+                        new_file
+                    ):  # No sobrescribir si por alguna razón ya existe
+                        if os.path.isfile(old_file):
+                            shutil.copy2(old_file, new_file)
 
-            os.rename(old_data_path, old_data_path + "_migrated")
-            print("¡Migración completada exitosamente!")
-        except Exception as e:
-            print(f"Error durante la migración de datos: {e}")
+                # Renombra la carpeta antigua para evitar que se migre de nuevo
+                try:
+                    os.rename(old_data_path, old_data_path + "_migrated")
+                except:
+                    pass  # Si falla el renombrado (por permisos), no bloquea el inicio
+            except Exception as e:
+                print(f"Error no crítico durante la migración: {e}")
 
 
+# Ejecutar la migración ANTES de que cualquier otra parte del código intente acceder a los datos
 migrate_old_data()
 
+# Las constantes globales ahora usan la ruta de datos segura
 DATA_PATH = get_persistent_data_path()
 SETTINGS_FILE = os.path.join(DATA_PATH, "settings.json")
 
+# --- FIN DE CAMBIOS ---
 
 from modules.auth_system_new import LoginSystemNew as LoginSystem
 from modules.encryption import db_manager
@@ -146,14 +180,20 @@ class BIGestPwdApp:
         if self.settings["privacy_mode"]:
             WindowHelper.set_display_affinity(self.root, True)
 
-        is_first_ever_run = not db_manager.is_master_configured()
+        # Verificar si hay una contraseña maestra configurada
+        is_configured = db_manager.is_master_configured()
+
+        # Verificar si es una actualización (si la versión guardada es diferente a la actual)
         is_new_version = self.is_new_version_update()
 
-        if is_first_ever_run:
+        if not is_configured:
+            # Si no hay contraseña maestra, es una instalación limpia o primer uso
             self.show_first_time_setup()
         elif is_new_version and "--startup" not in sys.argv:
+            # Si hay configuración PERO es una versión nueva, mostramos la ventana
             self._restore_window()
         else:
+            # Si ya está configurado y no hay novedades, iniciar minimizado
             self.start_in_background()
 
     def is_new_version_update(self):
