@@ -12,7 +12,7 @@
 <br><br>
 
 <!-- BOTÓN DE DESCARGA -->
-<a href="https://github.com/LoremRoman/BIGestPwd/releases/latest/download/BIGestPwd_2.8.3.exe">
+<a href="https://github.com/LoremRoman/BIGestPwd/releases/latest/download/Instalador_BIGestPwd_2.8.3.exe">
   <img src="assets/download-windows.png" alt="Download for Windows" width="250">
 </a>
 <br>
