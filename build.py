@@ -3,10 +3,11 @@ import subprocess
 import shutil
 import time
 from pathlib import Path
+from modules.config import APP_VERSION as CURRENT_VERSION
 
 
 def build_final():
-    print("INICIANDO COMPILACIÓN DE BIGestPwd 2.8.1...")
+    print(f"INICIANDO COMPILACIÓN DE BIGestPwd {CURRENT_VERSION}...")
 
     base_dir = Path(__file__).parent
     main_script = base_dir / "main.py"
@@ -14,6 +15,7 @@ def build_final():
     license_file = base_dir / "LICENSE"
     dist_dir = base_dir / "dist"
     build_dir = base_dir / "build"
+    exe_name = f"BIGestPwd_{CURRENT_VERSION}.exe"
 
     if not main_script.exists():
         print("❌ Error: No se encuentra main.py")
@@ -52,24 +54,23 @@ def build_final():
         "--onefile",
         "--windowed",
         "--clean",
-        "--name=BIGestPwd_2.8.1",
-        "--hidden-import=PIL",
-        "--hidden-import=PIL._tkinter_finder",
-        "--hidden-import=sqlite3",
-        "--hidden-import=requests",
-        "--hidden-import=packaging",
-        "--hidden-import=packaging.version",
-        "--hidden-import=pystray",
+        f"--name={exe_name.replace('.exe', '')}",
+        "--hidden-import=pystray._win32",
         "--hidden-import=win32api",
         "--hidden-import=win32con",
         "--hidden-import=win32event",
         "--hidden-import=winerror",
+        "--hidden-import=PIL._tkinter_finder",
+        "--hidden-import=sqlite3",
+        "--hidden-import=requests",
+        "--hidden-import=packaging.version",
         "--hidden-import=ctypes",
     ]
 
     cmd.extend(icon_arg)
     cmd.extend(data_arg_icon)
     cmd.extend(data_arg_license)
+    cmd.append("--add-data=data;data")
 
     cmd.append(str(main_script))
 
@@ -84,7 +85,7 @@ def build_final():
 
         print(f"\n✅ Compilación finalizada en {end_time - start_time:.2f} segundos.")
 
-        exe_path = dist_dir / "BIGestPwd_2.8.1.exe"
+        exe_path = dist_dir / exe_name
 
         if exe_path.exists():
             size_mb = exe_path.stat().st_size / (1024 * 1024)
@@ -93,11 +94,6 @@ def build_final():
             print(f"📂 Ubicación: {exe_path}")
             print(f"📏 Tamaño: {size_mb:.2f} MB")
             print("=" * 50)
-
-            data_folder = dist_dir / "data"
-            if not data_folder.exists():
-                os.makedirs(data_folder)
-
             print("\n¿Quieres probar el ejecutable ahora?")
             resp = input(
                 "Escribe 's' para sí, cualquier otra tecla para salir: "

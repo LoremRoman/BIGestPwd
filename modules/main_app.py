@@ -52,7 +52,7 @@ class MainApplication:
         }
         self.load_settings()
 
-        self.root.title("BIGestPwd 2.8.1 - Gestor Principal")
+        self.root.title("BIGestPwd 2.8.2 - Gestor Principal")
         self.root.configure(bg=self.widgets.bg_color)
 
         try:
@@ -507,7 +507,7 @@ class MainApplication:
 
         tk.Label(
             center,
-            text="BIGestPwd 2.8.1",
+            text="BIGestPwd 2.8.2",
             font=("Segoe UI", 24, "bold"),
             bg=self.widgets.card_bg,
             fg="white",

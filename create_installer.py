@@ -1,16 +1,19 @@
 import os
 import subprocess
 from pathlib import Path
+from modules.config import APP_VERSION as CURRENT_VERSION
 
 
 def create_installer_final():
-    print("🎯 CREANDO INSTALADOR PROFESIONAL (BIGestPwd 2.8.1)...")
+    print(f"🎯 CREANDO INSTALADOR PROFESIONAL (BIGestPwd {CURRENT_VERSION})...")
     print("=" * 60)
 
     project_dir = Path(__file__).parent
+    source_exe_name = f"BIGestPwd_{CURRENT_VERSION}.exe"
+    installer_name = f"Instalador_BIGestPwd_{CURRENT_VERSION}"
 
     required_files = [
-        ("dist/BIGestPwd_2.8.1.exe", "Ejecutable compilado"),
+        (f"dist/{source_exe_name}", "Ejecutable compilado"),
         ("icon.ico", "Icono de la aplicación"),
         ("LICENSE", "Licencia de uso"),
     ]
@@ -32,9 +35,9 @@ def create_installer_final():
     print("\n📝 Paso 2: Generando script de Inno Setup (.iss)...")
 
     iss_content = f"""#define MyAppName "BIGestPwd"
-#define MyAppVersion "2.8.1"
+#define MyAppVersion "{CURRENT_VERSION}"
 #define MyAppPublisher "BIGestPwd Security Team"
-#define SourceExeName "BIGestPwd_2.8.1.exe"
+#define SourceExeName "{source_exe_name}"
 #define DestExeName "BIGestPwd.exe"
 
 [Setup]
@@ -54,7 +57,7 @@ Compression=lzma2/max
 SolidCompression=yes
 LicenseFile=LICENSE
 OutputDir=Output
-OutputBaseFilename=Instalador_BIGestPwd_2.8.1
+OutputBaseFilename={installer_name}
 CloseApplications=yes
 RestartApplications=no
 
@@ -127,7 +130,7 @@ Filename: "{{app}}\{{#DestExeName}}"; Description: "Ejecutar {{#MyAppName}} ahor
         return
 
     output_dir = project_dir / "Output"
-    setup_exe = output_dir / "Instalador_BIGestPwd_2.8.1.exe"
+    setup_exe = output_dir / f"{installer_name}.exe"
 
     if setup_exe.exists():
         size_mb = setup_exe.stat().st_size / (1024 * 1024)
@@ -137,7 +140,7 @@ Filename: "{{app}}\{{#DestExeName}}"; Description: "Ejecutar {{#MyAppName}} ahor
         print(f"📂 Ubicación: {setup_exe}")
         print(f"📏 Tamaño:    {size_mb:.2f} MB")
         print("\n🚀 CARACTERÍSTICAS:")
-        print("   ✓ Versión 2.8.1 Configurada")
+        print(f"   ✓ Versión {CURRENT_VERSION} Configurada")
         print("   ✓ Estandarización de nombre (BIGestPwd.exe)")
         print("   ✓ Acceso directo limpio")
         print("\n👉 Todo listo para subir el Release a GitHub.")

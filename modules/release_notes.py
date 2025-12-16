@@ -1,7 +1,29 @@
 RELEASE_NOTES = {
+    "2.8.2": [
+        {
+            "emoji": "✨",
+            "title": "Corrección de Interfaz (Pantalla Negra)",
+            "desc": "Solucionado el bug crítico que mostraba una ventana vacía o negra al restaurar la aplicación desde la bandeja del sistema (System Tray).",
+        },
+        {
+            "emoji": "🚀",
+            "title": "Experiencia de Actualización Mejorada",
+            "desc": "Al actualizar a una nueva versión, la aplicación ahora se abrirá automáticamente para mostrar el login y las novedades, en lugar de permanecer oculta.",
+        },
+        {
+            "emoji": "✏️",
+            "title": "Compilador Robusto (No más DLLs faltantes)",
+            "desc": "Mejorado el script de compilación para incluir correctamente todas las librerías, eliminando el error de 'DLL faltante' que aparecía en algunos sistemas.",
+        },
+        {
+            "emoji": "🕰️",
+            "title": "Optimización y Estabilidad General",
+            "desc": "Refactorizado el manejo de hilos y animaciones para que la aplicación sea más rápida, estable y resistente a bloqueos inesperados.",
+        },
+    ],
     "2.8.1": [
         {
-            "emoji": "👻",
+            "emoji": "🛠️",
             "title": "Segundo Plano & Persistencia {FIXED]}",
             "desc": "Integración nativa con la bandeja del sistema (System Tray). Ahora puedes minimizar al reloj y configurar el 'Inicio Automático con Windows' para tener tus claves siempre listas.",
         },

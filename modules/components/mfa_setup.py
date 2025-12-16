@@ -25,7 +25,7 @@ class MFASetupWizard:
         self.setup_wizard()
 
     def setup_wizard(self):
-        self.parent.title("Configuración de Seguridad - BIGestPwd 2.8.1")
+        self.parent.title("Configuración de Seguridad - BIGestPwd 2.8.2")
         self.parent.configure(bg=self.widgets.bg_color)
 
         width = 750

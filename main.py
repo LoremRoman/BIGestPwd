@@ -36,6 +36,7 @@ SETTINGS_FILE = os.path.join(get_app_path(), "data", "settings.json")
 class BIGestPwdApp:
     def __init__(self):
         self.root = tk.Tk()
+        self.root.withdraw()
         self.master_password = ""
         self.widgets = ModernWidgets()
         self.virtual_kb = VirtualKeyboard(self.root)
@@ -59,6 +60,7 @@ class BIGestPwdApp:
 
         self.tray_icon = None
         self.is_closing = False
+        self.is_window_visible = False
 
         self.setup_system_tray()
         self.setup_app_window()
@@ -80,6 +82,7 @@ class BIGestPwdApp:
                 icon_path,
                 on_show_callback=self.show_window_from_tray,
                 on_exit_callback=self.quit_app_completely,
+                root_for_after=self.root,
             )
             self.tray_icon.run()
         except Exception as e:
@@ -105,30 +108,48 @@ class BIGestPwdApp:
         if self.settings["privacy_mode"]:
             WindowHelper.set_display_affinity(self.root, True)
 
-        if not db_manager.is_master_configured():
-            self.root.deiconify()
-            WindowHelper.center_window(self.root, 550, 700)
+        is_first_ever_run = not db_manager.is_master_configured()
+        is_new_version = self.is_new_version_update()
+
+        if is_first_ever_run:
             self.show_first_time_setup()
+        elif is_new_version and "--startup" not in sys.argv:
+            self._restore_window()
         else:
             self.start_in_background()
 
+    def is_new_version_update(self):
+        version_file = os.path.join(get_app_path(), "data", "version.json")
+        try:
+            if os.path.exists(version_file):
+                with open(version_file, "r") as f:
+                    data = json.load(f)
+                    last_version = data.get("version", "0.0")
+                    return last_version != CURRENT_VERSION
+            return True
+        except:
+            return True
+
     def start_in_background(self):
-        self.root.withdraw()
         if self.tray_icon:
             self.tray_icon.show_notification(
                 "BIGestPwd está activo",
-                "La aplicación se está ejecutando en segundo plano. Haz doble clic en el icono para abrir.",
+                "La aplicación se está ejecutando en segundo plano.",
             )
 
     def show_window_from_tray(self):
         self.root.after(0, self._restore_window)
 
     def _restore_window(self):
-        if self.root.state() == "normal":
+        if self.is_window_visible:
+            self.root.lift()
             self.root.focus_force()
             return
 
-        WindowAnimator.fade_in(self.root)
+        self.root.attributes("-alpha", 1.0)
+        self.root.deiconify()
+        self.is_window_visible = True
+        self.root.lift()
         self.root.focus_force()
 
         if not self.master_password:
@@ -137,7 +158,10 @@ class BIGestPwdApp:
     def minimize_to_tray(self):
         self.load_settings()
         if self.settings["minimize_to_tray"]:
-            WindowHelper.set_display_affinity(self.root, False)
+            if self.settings["privacy_mode"]:
+                WindowHelper.set_display_affinity(self.root, False)
+
+            self.is_window_visible = False
             WindowAnimator.fade_out(self.root)
         else:
             self.quit_app_completely()
@@ -175,14 +199,16 @@ class BIGestPwdApp:
             self.root.after(0, self._force_logout_afk)
 
     def _force_logout_afk(self):
-        self.clear_window()
-        self.root.withdraw()
+        if self.is_window_visible:
+            self.show_login()
+
         if self.tray_icon:
             self.tray_icon.show_notification(
                 "Sesión Cerrada", "Se cerró la sesión por inactividad (15 min)."
             )
 
     def show_first_time_setup(self):
+        self._restore_window()
         self.clear_window()
         main_frame = tk.Frame(self.root, bg=self.widgets.bg_color)
         main_frame.pack(fill="both", expand=True, padx=40, pady=40)
