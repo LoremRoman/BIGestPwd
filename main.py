@@ -2,6 +2,8 @@ import tkinter as tk
 import win32event
 import win32api
 import winerror
+import win32gui
+import win32con
 import sys
 import os
 import json
@@ -10,7 +12,44 @@ from tkinter import ttk
 
 from modules.config import APP_VERSION as CURRENT_VERSION
 
-# --- INICIO DE CORRECCIONES ---
+# --- INICIO DE LÓGICA DE INSTANCIA ÚNICA ---
+# Variable global para mantener vivo el candado (Mutex)
+app_mutex = None
+MUTEX_NAME = "BIGestPwd_SingleInstanceMutex"
+
+
+def acquire_mutex():
+    """Intenta adquirir el candado de instancia única. Retorna True si es el primero."""
+    global app_mutex
+    try:
+        app_mutex = win32event.CreateMutex(None, 1, MUTEX_NAME)
+        if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
+            return False
+        return True
+    except:
+        return True
+
+
+def focus_existing_window():
+    """Busca la ventana ya abierta y la trae al frente."""
+    try:
+        # Busca la ventana por su título exacto
+        window_title = f"BIGestPwd {CURRENT_VERSION}"
+        hwnd = win32gui.FindWindow(None, window_title)
+
+        if hwnd:
+            # Si está minimizada o en segundo plano, restáurala
+            win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
+            win32gui.SetForegroundWindow(hwnd)
+        else:
+            # Si no la encuentra (quizás está oculta en tray), intentamos una búsqueda más genérica
+            # o simplemente salimos, ya que el usuario la verá en el tray.
+            pass
+    except:
+        pass
+
+
+# --- FIN DE LÓGICA DE INSTANCIA ÚNICA ---
 
 
 def get_app_path():
@@ -22,10 +61,8 @@ def get_app_path():
 
 def get_persistent_data_path():
     """Obtiene la ruta a la carpeta de datos segura y persistente del usuario en AppData\Local."""
-    # CORRECCIÓN: Se eliminó la 'D' extra. Antes decía LOCALAPPDDATA
     app_data = os.getenv("LOCALAPPDATA")
     if not app_data:
-        # Respaldo por si la variable de entorno falla
         app_data = os.path.expanduser(r"~\AppData\Local")
 
     path = os.path.join(app_data, "BIGestPwd")
@@ -51,34 +88,24 @@ def migrate_old_data():
     old_data_path = os.path.join(get_app_path(), "data")
     new_data_path = get_persistent_data_path()
 
-    # Si la carpeta 'data' antigua existe y no estamos ya en AppData
     if os.path.exists(old_data_path) and os.path.abspath(
         old_data_path
     ) != os.path.abspath(new_data_path):
-        # Verificar específicamente si hay una base de datos antigua que valga la pena mover
         old_db = os.path.join(old_data_path, "bigestpwd_secure.db")
         if os.path.exists(old_db):
-            print(
-                f"Detectada carpeta de datos antigua en: {old_data_path}. Migrando..."
-            )
             try:
-                # Copia cada archivo de la carpeta vieja a la nueva
                 for filename in os.listdir(old_data_path):
                     old_file = os.path.join(old_data_path, filename)
                     new_file = os.path.join(new_data_path, filename)
-                    if not os.path.exists(
-                        new_file
-                    ):  # No sobrescribir si por alguna razón ya existe
+                    if not os.path.exists(new_file):
                         if os.path.isfile(old_file):
                             shutil.copy2(old_file, new_file)
-
-                # Renombra la carpeta antigua para evitar que se migre de nuevo
                 try:
                     os.rename(old_data_path, old_data_path + "_migrated")
                 except:
-                    pass  # Si falla el renombrado (por permisos), no bloquea el inicio
-            except Exception as e:
-                print(f"Error no crítico durante la migración: {e}")
+                    pass
+            except Exception:
+                pass
 
 
 # Ejecutar la migración ANTES de que cualquier otra parte del código intente acceder a los datos
@@ -88,7 +115,6 @@ migrate_old_data()
 DATA_PATH = get_persistent_data_path()
 SETTINGS_FILE = os.path.join(DATA_PATH, "settings.json")
 
-# --- FIN DE CAMBIOS ---
 
 from modules.auth_system_new import LoginSystemNew as LoginSystem
 from modules.encryption import db_manager
@@ -101,8 +127,6 @@ from modules.release_notes import RELEASE_NOTES
 from modules.utils.afk_monitor import AFKMonitor
 from modules.utils.system_tray import AppTrayIcon
 from modules.utils.animator import WindowAnimator
-
-MUTEX_NAME = "BIGestPwd_SingleInstanceMutex"
 
 
 class BIGestPwdApp:
@@ -180,20 +204,14 @@ class BIGestPwdApp:
         if self.settings["privacy_mode"]:
             WindowHelper.set_display_affinity(self.root, True)
 
-        # Verificar si hay una contraseña maestra configurada
         is_configured = db_manager.is_master_configured()
-
-        # Verificar si es una actualización (si la versión guardada es diferente a la actual)
         is_new_version = self.is_new_version_update()
 
         if not is_configured:
-            # Si no hay contraseña maestra, es una instalación limpia o primer uso
             self.show_first_time_setup()
         elif is_new_version and "--startup" not in sys.argv:
-            # Si hay configuración PERO es una versión nueva, mostramos la ventana
             self._restore_window()
         else:
-            # Si ya está configurado y no hay novedades, iniciar minimizado
             self.start_in_background()
 
     def is_new_version_update(self):
@@ -587,24 +605,9 @@ class BIGestPwdApp:
             widget.destroy()
 
 
-def check_single_instance():
-    try:
-        mutex = win32event.CreateMutex(None, 1, MUTEX_NAME)
-        if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
-            return True
-        return False
-    except:
-        return False
-
-
 if __name__ == "__main__":
-    if check_single_instance():
-        WindowHelper.show_custom_message(
-            None,
-            "BIGestPwd Abierto",
-            "La aplicación ya se está ejecutando en segundo plano. Por favor, revisa la bandeja del sistema.",
-            is_error=False,
-        )
+    if not acquire_mutex():
+        focus_existing_window()
         sys.exit(0)
 
     app = BIGestPwdApp()
