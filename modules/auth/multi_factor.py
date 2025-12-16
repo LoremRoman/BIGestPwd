@@ -1,14 +1,11 @@
 import sqlite3
 import os
-from modules.encryption import db_manager
-
-DATA_DIR = os.path.join(os.getcwd(), "data")
-DEFAULT_DB_PATH = os.path.join(DATA_DIR, "bigestpwd_secure.db")
+from modules.encryption import db_manager, DB_PATH
 
 
 class MultiFactorAuth:
     def __init__(self, db_path=None):
-        self.db_path = db_path if db_path else DEFAULT_DB_PATH
+        self.db_path = db_path if db_path else DB_PATH
 
     def get_mfa_status(self):
         conn = sqlite3.connect(self.db_path, check_same_thread=False)

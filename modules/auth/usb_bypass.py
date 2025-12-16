@@ -4,19 +4,18 @@ import sqlite3
 import time
 import threading
 from modules.security.file_encryption import FileEncryption
+from modules.encryption import DB_PATH  # IMPORTACIÓN CLAVE: Usar la ruta correcta
 
 try:
     import psutil
 except ImportError:
     psutil = None
 
-DATA_DIR = os.path.join(os.getcwd(), "data")
-DEFAULT_DB_PATH = os.path.join(DATA_DIR, "bigestpwd_secure.db")
-
 
 class USBBypass:
     def __init__(self, db_path=None):
-        self.db_path = db_path if db_path else DEFAULT_DB_PATH
+        # CORRECCIÓN: Usar DB_PATH importado de encryption.py
+        self.db_path = db_path if db_path else DB_PATH
         self.file_encryption = FileEncryption()
         self.db_lock = threading.Lock()
 

@@ -19,31 +19,73 @@ def _get_old_base_path():
 
 
 def get_persistent_data_path():
-    path = os.path.join(os.getenv("LOCALAPPDATA"), "BIGestPwd")
+    # Obtener ruta segura AppData
+    app_data = os.getenv("LOCALAPPDATA")
+    if not app_data:
+        app_data = os.path.expanduser(r"~\AppData\Local")
+
+    path = os.path.join(app_data, "BIGestPwd")
     os.makedirs(path, exist_ok=True)
     return path
 
 
 def migrate_old_data():
+    """
+    Migración Forzada:
+    Si existe la carpeta 'data' antigua, copia TODO su contenido a AppData,
+    sobrescribiendo los archivos vacíos que se hayan creado al iniciar.
+    """
     old_data_path = os.path.join(_get_old_base_path(), "data")
     new_data_path = get_persistent_data_path()
 
-    if os.path.exists(old_data_path) and old_data_path != new_data_path:
-        old_db_file = os.path.join(old_data_path, "bigestpwd_secure.db")
-        new_db_file = os.path.join(new_data_path, "bigestpwd_secure.db")
+    # Solo migrar si la carpeta antigua existe y NO ha sido renombrada todavía
+    if os.path.exists(old_data_path) and os.path.isdir(old_data_path):
+        print(f"Detectados datos antiguos en: {old_data_path}. Iniciando migración...")
 
-        if os.path.exists(old_db_file) and not os.path.exists(new_db_file):
-            try:
-                shutil.copy2(old_db_file, new_db_file)
-                # Opcional: renombrar la carpeta antigua para evitar futuras migraciones
-                # os.rename(old_data_path, old_data_path + "_migrated")
-            except Exception as e:
-                pass
+        migrated_any = False
+        try:
+            # Recorrer todos los archivos en la carpeta vieja (db, salt, settings, etc.)
+            for filename in os.listdir(old_data_path):
+                source_file = os.path.join(old_data_path, filename)
+
+                # Solo copiar archivos, ignorar subcarpetas
+                if os.path.isfile(source_file):
+                    dest_file = os.path.join(new_data_path, filename)
+
+                    try:
+                        # Copy2 preserva metadatos y SOBRESCRIBE si ya existe (esto arregla tu problema)
+                        shutil.copy2(source_file, dest_file)
+                        print(f" -> Migrado: {filename}")
+                        migrated_any = True
+                    except Exception as e:
+                        print(f"Error copiando {filename}: {e}")
+
+            # Si logramos copiar algo, renombramos la carpeta vieja para no hacerlo de nuevo
+            if migrated_any:
+                try:
+                    new_name = old_data_path + "_migrated"
+                    if os.path.exists(new_name):
+                        # Si ya existía una carpeta migrated (raro), forzamos nombre único
+                        import time
+
+                        new_name = f"{old_data_path}_migrated_{int(time.time())}"
+
+                    os.rename(old_data_path, new_name)
+                    print("Migración completada y carpeta antigua renombrada.")
+                except Exception as e:
+                    print(
+                        f"No se pudo renombrar la carpeta antigua (quizás permisos): {e}"
+                    )
+
+        except Exception as e:
+            print(f"Error general en migración: {e}")
 
 
+# Ejecutar migración ANTES de definir las rutas de DB
 migrate_old_data()
 
 DB_PATH = os.path.join(get_persistent_data_path(), "bigestpwd_secure.db")
+SALT_PATH = os.path.join(get_persistent_data_path(), "salt.key")
 
 
 class SecureEncryption:
