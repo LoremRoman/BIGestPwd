@@ -4,13 +4,13 @@ from pathlib import Path
 
 
 def create_installer_final():
-    print("🎯 CREANDO INSTALADOR PROFESIONAL (BIGestPwd 2.8)...")
+    print("🎯 CREANDO INSTALADOR PROFESIONAL (BIGestPwd 2.8.1)...")
     print("=" * 60)
 
     project_dir = Path(__file__).parent
 
     required_files = [
-        ("dist/BIGestPwd_2.8.exe", "Ejecutable compilado"),
+        ("dist/BIGestPwd_2.8.1.exe", "Ejecutable compilado"),
         ("icon.ico", "Icono de la aplicación"),
         ("LICENSE", "Licencia de uso"),
     ]
@@ -32,9 +32,9 @@ def create_installer_final():
     print("\n📝 Paso 2: Generando script de Inno Setup (.iss)...")
 
     iss_content = f"""#define MyAppName "BIGestPwd"
-#define MyAppVersion "2.8"
+#define MyAppVersion "2.8.1"
 #define MyAppPublisher "BIGestPwd Security Team"
-#define SourceExeName "BIGestPwd_2.8.exe"
+#define SourceExeName "BIGestPwd_2.8.1.exe"
 #define DestExeName "BIGestPwd.exe"
 
 [Setup]
@@ -54,7 +54,7 @@ Compression=lzma2/max
 SolidCompression=yes
 LicenseFile=LICENSE
 OutputDir=Output
-OutputBaseFilename=Instalador_BIGestPwd_2.8
+OutputBaseFilename=Instalador_BIGestPwd_2.8.1
 CloseApplications=yes
 RestartApplications=no
 
@@ -127,7 +127,7 @@ Filename: "{{app}}\{{#DestExeName}}"; Description: "Ejecutar {{#MyAppName}} ahor
         return
 
     output_dir = project_dir / "Output"
-    setup_exe = output_dir / "Instalador_BIGestPwd_2.8.exe"
+    setup_exe = output_dir / "Instalador_BIGestPwd_2.8.1.exe"
 
     if setup_exe.exists():
         size_mb = setup_exe.stat().st_size / (1024 * 1024)
@@ -137,7 +137,7 @@ Filename: "{{app}}\{{#DestExeName}}"; Description: "Ejecutar {{#MyAppName}} ahor
         print(f"📂 Ubicación: {setup_exe}")
         print(f"📏 Tamaño:    {size_mb:.2f} MB")
         print("\n🚀 CARACTERÍSTICAS:")
-        print("   ✓ Versión 2.8 Configurada")
+        print("   ✓ Versión 2.8.1 Configurada")
         print("   ✓ Estandarización de nombre (BIGestPwd.exe)")
         print("   ✓ Acceso directo limpio")
         print("\n👉 Todo listo para subir el Release a GitHub.")

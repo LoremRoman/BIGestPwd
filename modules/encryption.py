@@ -1,4 +1,5 @@
 import os
+import sys
 import base64
 import sqlite3
 import threading
@@ -7,7 +8,17 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 
-DATA_DIR = os.path.join(os.getcwd(), "data")
+
+def get_base_path():
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    else:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        return os.path.dirname(current_dir)
+
+
+DATA_DIR = os.path.join(get_base_path(), "data")
+
 if not os.path.exists(DATA_DIR):
     try:
         os.makedirs(DATA_DIR)
@@ -110,10 +121,10 @@ class DatabaseManager:
                 cursor = conn.cursor()
 
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS master_config (id INTEGER PRIMARY KEY, master_hash BLOB NOT NULL, master_salt BLOB NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                    "CREATE TABLE IF NOT EXISTS master_config (id INTEGER PRIMARY KEY, master_hash BLOB NOT NULL, master_salt BLOB NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
                 )
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, color TEXT DEFAULT '#3b82f6', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                    "CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE, color TEXT DEFAULT '#3b82f6', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
                 )
 
                 default_categories = [
@@ -134,19 +145,19 @@ class DatabaseManager:
                     )
 
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS password_entries (id INTEGER PRIMARY KEY, category_id INTEGER, title TEXT NOT NULL, username TEXT, encrypted_password BLOB NOT NULL, password_salt BLOB NOT NULL, url TEXT, notes BLOB, notes_salt BLOB, strength INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (category_id) REFERENCES categories(id))"""
+                    "CREATE TABLE IF NOT EXISTS password_entries (id INTEGER PRIMARY KEY, category_id INTEGER, title TEXT NOT NULL, username TEXT, encrypted_password BLOB NOT NULL, password_salt BLOB NOT NULL, url TEXT, notes BLOB, notes_salt BLOB, strength INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (category_id) REFERENCES categories(id))"
                 )
 
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS totp_secrets (id INTEGER PRIMARY KEY, service_name TEXT DEFAULT 'BIGestPwd', encrypted_secret BLOB NOT NULL, secret_salt BLOB NOT NULL, backup_codes BLOB, backup_salt BLOB, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                    "CREATE TABLE IF NOT EXISTS totp_secrets (id INTEGER PRIMARY KEY, service_name TEXT DEFAULT 'BIGestPwd', encrypted_secret BLOB NOT NULL, secret_salt BLOB NOT NULL, backup_codes BLOB, backup_salt BLOB, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
                 )
 
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS mfa_config (id INTEGER PRIMARY KEY, method_name TEXT NOT NULL UNIQUE, is_enabled BOOLEAN DEFAULT 0, is_configured BOOLEAN DEFAULT 0, config_data BLOB, config_salt BLOB, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                    "CREATE TABLE IF NOT EXISTS mfa_config (id INTEGER PRIMARY KEY, method_name TEXT NOT NULL UNIQUE, is_enabled BOOLEAN DEFAULT 0, is_configured BOOLEAN DEFAULT 0, config_data BLOB, config_salt BLOB, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
                 )
 
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS user_profile (id INTEGER PRIMARY KEY, display_name TEXT NOT NULL, is_anonymous BOOLEAN DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""
+                    "CREATE TABLE IF NOT EXISTS user_profile (id INTEGER PRIMARY KEY, display_name TEXT NOT NULL, is_anonymous BOOLEAN DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"
                 )
 
                 mfa_methods = [
@@ -161,13 +172,13 @@ class DatabaseManager:
                     )
 
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS usb_devices (id INTEGER PRIMARY KEY, device_name TEXT NOT NULL, device_uuid TEXT UNIQUE NOT NULL, device_path TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, last_seen DATETIME DEFAULT CURRENT_TIMESTAMP, is_active BOOLEAN DEFAULT 1)"""
+                    "CREATE TABLE IF NOT EXISTS usb_devices (id INTEGER PRIMARY KEY, device_name TEXT NOT NULL, device_uuid TEXT UNIQUE NOT NULL, device_path TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP, last_seen DATETIME DEFAULT CURRENT_TIMESTAMP, is_active BOOLEAN DEFAULT 1)"
                 )
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS usb_security_files (id INTEGER PRIMARY KEY, device_uuid TEXT NOT NULL, file_name TEXT NOT NULL, encrypted_data BLOB NOT NULL, file_salt BLOB NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (device_uuid) REFERENCES usb_devices(device_uuid))"""
+                    "CREATE TABLE IF NOT EXISTS usb_security_files (id INTEGER PRIMARY KEY, device_uuid TEXT NOT NULL, file_name TEXT NOT NULL, encrypted_data BLOB NOT NULL, file_salt BLOB NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, FOREIGN KEY (device_uuid) REFERENCES usb_devices(device_uuid))"
                 )
                 cursor.execute(
-                    """CREATE TABLE IF NOT EXISTS usb_blacklist (id INTEGER PRIMARY KEY, device_uuid TEXT UNIQUE NOT NULL, device_name TEXT NOT NULL, revoked_at DATETIME DEFAULT CURRENT_TIMESTAMP, cleaned BOOLEAN DEFAULT 0, reason TEXT DEFAULT 'Usuario eliminó dispositivo')"""
+                    "CREATE TABLE IF NOT EXISTS usb_blacklist (id INTEGER PRIMARY KEY, device_uuid TEXT UNIQUE NOT NULL, device_name TEXT NOT NULL, revoked_at DATETIME DEFAULT CURRENT_TIMESTAMP, cleaned BOOLEAN DEFAULT 0, reason TEXT DEFAULT 'Usuario eliminó dispositivo')"
                 )
 
                 conn.commit()
@@ -253,7 +264,7 @@ class DatabaseManager:
             with self.db_lock:
                 with self._get_connection() as conn:
                     conn.execute(
-                        """INSERT INTO password_entries (category_id, title, username, encrypted_password, password_salt, url, notes, notes_salt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                        "INSERT INTO password_entries (category_id, title, username, encrypted_password, password_salt, url, notes, notes_salt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                         (
                             category_id,
                             title,
@@ -294,7 +305,7 @@ class DatabaseManager:
             with self.db_lock:
                 with self._get_connection() as conn:
                     conn.execute(
-                        """UPDATE password_entries SET category_id = ?, title = ?, username = ?, encrypted_password = ?, password_salt = ?, url = ?, notes = ?, notes_salt = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?""",
+                        "UPDATE password_entries SET category_id = ?, title = ?, username = ?, encrypted_password = ?, password_salt = ?, url = ?, notes = ?, notes_salt = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
                         (
                             category_id,
                             title,
@@ -317,7 +328,7 @@ class DatabaseManager:
             with self._get_connection() as conn:
                 cursor = conn.cursor()
                 cursor.execute(
-                    """SELECT p.id, c.name, c.color, p.title, p.username, p.encrypted_password, p.password_salt, p.url, p.notes, p.notes_salt, p.created_at, p.updated_at FROM password_entries p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.title"""
+                    "SELECT p.id, c.name, c.color, p.title, p.username, p.encrypted_password, p.password_salt, p.url, p.notes, p.notes_salt, p.created_at, p.updated_at FROM password_entries p LEFT JOIN categories c ON p.category_id = c.id ORDER BY p.title"
                 )
                 rows = cursor.fetchall()
 

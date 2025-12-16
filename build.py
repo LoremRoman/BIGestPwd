@@ -6,7 +6,7 @@ from pathlib import Path
 
 
 def build_final():
-    print("INICIANDO COMPILACIÓN DE BIGestPwd 2.8...")
+    print("INICIANDO COMPILACIÓN DE BIGestPwd 2.8.1...")
 
     base_dir = Path(__file__).parent
     main_script = base_dir / "main.py"
@@ -52,7 +52,7 @@ def build_final():
         "--onefile",
         "--windowed",
         "--clean",
-        "--name=BIGestPwd_2.8",
+        "--name=BIGestPwd_2.8.1",
         "--hidden-import=PIL",
         "--hidden-import=PIL._tkinter_finder",
         "--hidden-import=sqlite3",
@@ -84,7 +84,7 @@ def build_final():
 
         print(f"\n✅ Compilación finalizada en {end_time - start_time:.2f} segundos.")
 
-        exe_path = dist_dir / "BIGestPwd_2.8.exe"
+        exe_path = dist_dir / "BIGestPwd_2.8.1.exe"
 
         if exe_path.exists():
             size_mb = exe_path.stat().st_size / (1024 * 1024)

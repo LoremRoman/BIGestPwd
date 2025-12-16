@@ -81,7 +81,7 @@ class TOTPOffline:
     def generate_qr_code(self, secret, username="BIGestPwd User"):
         try:
             totp = pyotp.TOTP(secret)
-            uri = totp.provisioning_uri(name=username, issuer_name="BIGestPwd 2.8")
+            uri = totp.provisioning_uri(name=username, issuer_name="BIGestPwd 2.8.1")
             qr = qrcode.QRCode(
                 version=1,
                 error_correction=qrcode.constants.ERROR_CORRECT_L,

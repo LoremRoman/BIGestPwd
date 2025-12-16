@@ -1,4 +1,11 @@
 RELEASE_NOTES = {
+    "2.8.1": [
+        {
+            "emoji": "👻",
+            "title": "Segundo Plano & Persistencia {FIXED]}",
+            "desc": "Integración nativa con la bandeja del sistema (System Tray). Ahora puedes minimizar al reloj y configurar el 'Inicio Automático con Windows' para tener tus claves siempre listas.",
+        },
+    ],
     "2.8": [
         {
             "emoji": "👻",

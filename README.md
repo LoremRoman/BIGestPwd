@@ -1,4 +1,4 @@
-# 🛡️ BIGestPwd 2.8
+# 🛡️ BIGestPwd 2.8.1
 
 > **Secure. Open Source. Free. Always.**
 
@@ -12,7 +12,7 @@
 <br><br>
 
 <!-- BOTÓN DE DESCARGA -->
-<a href="https://github.com/LoremRoman/BIGestPwd/releases/latest/download/Instalador_BIGestPwd_2.8.exe">
+<a href="https://github.com/LoremRoman/BIGestPwd/releases/latest/download/Instalador_BIGestPwd_2.8.1.exe">
   <img src="assets/download-windows.png" alt="Download for Windows" width="250">
 </a>
 <br>
@@ -26,7 +26,7 @@
 
 Ahora cuenta con **ejecución en segundo plano**, protección contra espionaje y un sistema de **actualizaciones automáticas** modernizado.
 
-## ✨ Novedades en v2.8
+## ✨ Novedades en v2.8.1
 
 ¡Esta actualización cambia la forma en que usas la aplicación!
 
@@ -73,7 +73,7 @@ No te conformes solo con una contraseña. BIGestPwd ofrece seguridad por capas:
 El método más sencillo para empezar a proteger tus contraseñas.
 
 1.  Haz clic en el botón de **Download for Windows** arriba 👆 o ve a la sección de **[Releases](../../releases)**.
-2.  Descarga el instalador `Instalador_BIGestPwd_2.8.exe`.
+2.  Descarga el instalador `Instalador_BIGestPwd_2.8.1.exe`.
 3.  Ejecútalo e instala.
 4.  **¡Listo!** El programa se encargará de avisarte cuando haya nuevas versiones.
 

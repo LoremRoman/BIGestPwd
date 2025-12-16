@@ -22,7 +22,15 @@ from modules.utils.system_tray import AppTrayIcon
 from modules.utils.animator import WindowAnimator
 
 MUTEX_NAME = "BIGestPwd_SingleInstanceMutex"
-SETTINGS_FILE = os.path.join(os.getcwd(), "data", "settings.json")
+
+
+def get_app_path():
+    if getattr(sys, "frozen", False):
+        return os.path.dirname(sys.executable)
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+SETTINGS_FILE = os.path.join(get_app_path(), "data", "settings.json")
 
 
 class BIGestPwdApp:
@@ -66,7 +74,7 @@ class BIGestPwdApp:
 
     def setup_system_tray(self):
         try:
-            icon_path = os.path.join(os.path.dirname(__file__), "icon.ico")
+            icon_path = os.path.join(get_app_path(), "icon.ico")
             self.tray_icon = AppTrayIcon(
                 f"BIGestPwd {CURRENT_VERSION}",
                 icon_path,
@@ -84,7 +92,7 @@ class BIGestPwdApp:
         self.root.minsize(500, 600)
 
         try:
-            icon_path = os.path.join(os.path.dirname(__file__), "icon.ico")
+            icon_path = os.path.join(get_app_path(), "icon.ico")
             self.root.iconbitmap(icon_path)
         except Exception as e:
             pass
@@ -341,7 +349,7 @@ class BIGestPwdApp:
         self.check_version_and_show_news()
 
     def check_version_and_show_news(self):
-        version_file = os.path.join(os.getcwd(), "data", "version.json")
+        version_file = os.path.join(get_app_path(), "data", "version.json")
         show_modal = False
 
         try:
@@ -359,6 +367,7 @@ class BIGestPwdApp:
         if show_modal:
             self.root.after(500, self.show_whats_new_modal)
             try:
+                os.makedirs(os.path.dirname(version_file), exist_ok=True)
                 with open(version_file, "w") as f:
                     json.dump({"version": CURRENT_VERSION}, f)
             except:
