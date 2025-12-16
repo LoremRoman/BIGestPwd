@@ -12,7 +12,7 @@
 <br><br>
 
 <!-- BOTÓN DE DESCARGA -->
-<a href="https://github.com/LoremRoman/BIGestPwd/releases/latest/download/Instalador_BIGestPwd_2.8.2.exe">
+<a href="https://github.com/LoremRoman/BIGestPwd/releases/latest/download/BIGestPwd_2.8.2.exe">
   <img src="assets/download-windows.png" alt="Download for Windows" width="250">
 </a>
 <br>
@@ -73,7 +73,7 @@ No te conformes solo con una contraseña. BIGestPwd ofrece seguridad por capas:
 El método más sencillo para empezar a proteger tus contraseñas.
 
 1.  Haz clic en el botón de **Download for Windows** arriba 👆 o ve a la sección de **[Releases](../../releases)**.
-2.  Descarga el instalador `Instalador_BIGestPwd_2.8.2.exe`.
+2.  Descarga el instalador `BIGestPwd_2.8.2.exe`.
 3.  Ejecútalo e instala.
 4.  **¡Listo!** El programa se encargará de avisarte cuando haya nuevas versiones.
 
