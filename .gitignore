@@ -35,3 +35,6 @@ Thumbs.db
 
 # --- Logs y Errores ---
 *.log
+
+# --- Anotaciones Personales ---
+MEJORAS.txt
